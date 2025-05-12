@@ -3,7 +3,7 @@
 require 'license_finder/package_utils/activation'
 
 module LicenseFinder
-  Licensing = Struct.new(:package, :decided_licenses, :licenses_from_spec, :license_files) do
+  Licensing = Struct.new(:package) do
     # Implements the algorithm for choosing the right set of licenses from
     # among the various sources of licenses we know about.  In order of
     # priority, licenses come from decisions, package specs, or package files.
@@ -17,17 +17,17 @@ module LicenseFinder
     end
 
     def activations_from_decisions
-      @activations_from_decisions ||= decided_licenses
+      @activations_from_decisions ||= package.decided_licenses
                .map { |license| Activation::FromDecision.new(package, license) }
     end
 
     def activations_from_spec
-      @activations_from_spec ||= licenses_from_spec
+      @activations_from_spec ||= package.licenses_from_spec
                .map { |license| Activation::FromSpec.new(package, license) }
     end
 
     def activations_from_files
-      @activations_from_files ||= license_files
+      @activations_from_files ||= package.license_files
                .group_by(&:license)
                .map { |license, files| Activation::FromFiles.new(package, license, files) }
     end
