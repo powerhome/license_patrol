@@ -18,7 +18,7 @@ module LicenseFinder
   #   the constructor options
   # - otherwise, override #licenses_from_spec or #license_files
   class Package
-    attr_reader :logger, :name, :version, :authors, :summary, :description, :children, :parents, :groups, :manual_approval, :license_names_from_spec, :install_path, :decided_licenses
+    attr_reader :logger, :name, :version, :authors, :summary, :description, :children, :parents, :groups, :manual_approval, :license_names_from_spec, :install_path
 
     def self.license_names_from_standard_spec(spec)
       licenses = spec['licenses'] || [spec['license']].compact
@@ -127,7 +127,12 @@ module LicenseFinder
     end
 
     def licensing
-      Licensing.new(self)
+      Licensing.new(
+        self,
+        @decided_licenses,
+        -> { licenses_from_spec },
+        -> { license_files }
+      )
     end
 
     def decide_on_license(license)
