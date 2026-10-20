@@ -12,10 +12,12 @@ module LicenseFinder
     end
 
     def current_packages
-      logger.debug self.class, "including groups #{included_groups.inspect}"
-      details.map do |gem_detail, bundle_detail|
-        BundlerPackage.new(gem_detail, bundle_detail, logger: logger).tap do |package|
-          log_package_dependencies package
+      with_gemfile do
+        logger.debug self.class, "including groups #{included_groups.inspect}"
+        details.map do |gem_detail, bundle_detail|
+          BundlerPackage.new(gem_detail, bundle_detail, logger: logger).tap do |package|
+            log_package_dependencies package
+          end
         end
       end
     end
@@ -34,9 +36,7 @@ module LicenseFinder
     end
 
     def possible_package_paths
-      ::Bundler.with_original_env do
-        [project_path.join(gemfile)]
-      end
+      [gemfile_path]
     end
 
     private
@@ -46,9 +46,15 @@ module LicenseFinder
     def definition
       return @definition if @definition
 
-      ENV['BUNDLE_GEMFILE'] = File.join(project_path, gemfile)
-
       @definition = ::Bundler::Definition.build(detected_package_path, lockfile_path, nil) if detected_package_path
+    end
+
+    def with_gemfile
+      previous_gemfile = ENV['BUNDLE_GEMFILE']
+      ENV['BUNDLE_GEMFILE'] = gemfile_path.to_s
+      yield
+    ensure
+      ENV['BUNDLE_GEMFILE'] = previous_gemfile
     end
 
     def details
@@ -83,11 +89,12 @@ module LicenseFinder
     end
 
     def lockfile_path
-      project_path.join(lockfile)
+      Pathname("#{gemfile_path}.lock")
     end
 
+    # Bundler keeps the config (e.g. BUNDLE_PATH for vendored gems) next to the gemfile
     def bundler_config_path_found
-      config_file = project_path.join('.bundle/config')
+      config_file = gemfile_path.dirname.join('.bundle/config')
 
       return false unless File.exist?(config_file)
 
@@ -107,12 +114,21 @@ module LicenseFinder
       end
     end
 
-    def gemfile
-      @gemfile ||= ENV['BUNDLE_GEMFILE'] || 'Gemfile'
+    def gemfile_path
+      @gemfile_path ||= project_path.join(gemfile)
     end
 
-    def lockfile
-      "#{gemfile}.lock"
+    # BUNDLE_GEMFILE is taken as relative to the project path. Through `bundle exec`
+    # it gets expanded to an absolute path, which may point to another project
+    # (e.g. when using --project_path), in which case only its basename is kept.
+    def gemfile
+      gemfile = ENV['BUNDLE_GEMFILE']
+      return 'Gemfile' if gemfile.nil? || gemfile.empty?
+      return gemfile unless Pathname(gemfile).absolute?
+
+      gemfile = Pathname(gemfile).expand_path
+      project_root = project_path.expand_path
+      gemfile.ascend.any? { |path| path == project_root } ? gemfile.to_s : gemfile.basename.to_s
     end
   end
 end
