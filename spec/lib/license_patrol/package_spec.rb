@@ -90,6 +90,14 @@ module LicensePatrol
           subject.decide_on_license(License.find_by_name('MIT'))
           expect(subject.licenses.map(&:name)).to eq ['MIT']
         end
+
+        it 'does not look for licenses in the spec or the install path' do
+          subject = described_class.new(nil, nil, spec_licenses: ['GPL'], install_path: 'some/package/path', logger: logger)
+          subject.decide_on_license(License.find_by_name('MIT'))
+          expect(subject).not_to receive(:licenses_from_spec)
+          expect(LicenseFiles).not_to receive(:find)
+          subject.licenses
+        end
       end
 
       describe 'from the spec' do
@@ -108,6 +116,12 @@ module LicensePatrol
           subject = described_class.new(nil, nil, spec_licenses: ['MIT'], install_path: 'some/package/path', logger: logger)
           expect(subject.licenses.map(&:name)).to eq ['MIT']
         end
+
+        it 'does not look for licenses in the install path' do
+          subject = described_class.new(nil, nil, spec_licenses: ['MIT'], install_path: 'some/package/path', logger: logger)
+          expect(LicenseFiles).not_to receive(:find)
+          subject.licenses
+        end
       end
 
       describe 'from the install path' do
@@ -121,6 +135,13 @@ module LicensePatrol
           stub_license_files 'MIT', 'Expat'
           subject = described_class.new(nil, nil, install_path: 'some/package/path', logger: logger)
           expect(subject.licenses.map(&:name)).to eq ['MIT']
+        end
+
+        it 'searches the install path only once' do
+          stub_license_files 'MIT'
+          subject = described_class.new(nil, nil, install_path: 'some/package/path', logger: logger)
+          subject.licenses
+          expect(LicenseFiles).to have_received(:find).once
         end
       end
     end

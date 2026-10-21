@@ -78,9 +78,18 @@ module LicensePatrol
         Bundler.new(project_path: custom_gemfile, ignored_groups: Set.new(%w[dev test]))
       end
 
-      it 'defaults to Gemfile/Gemfile.lock' do
-        expect(::Bundler::Definition).to receive(:build).with(custom_gemfile.join('Gemfile'), custom_gemfile.join('Gemfile.lock'), nil).and_return(definition)
-        expect(subject.current_packages).to_not be_empty
+      context 'when actually not specifying' do
+        around do |example|
+          old_var = ENV['BUNDLE_GEMFILE']
+          ENV.delete 'BUNDLE_GEMFILE'
+          example.run
+          ENV['BUNDLE_GEMFILE'] = old_var
+        end
+
+        it 'defaults to Gemfile/Gemfile.lock' do
+          expect(::Bundler::Definition).to receive(:build).with(custom_gemfile.join('Gemfile'), custom_gemfile.join('Gemfile.lock'), nil).and_return(definition)
+          expect(subject.current_packages).to_not be_empty
+        end
       end
 
       context 'with the BUNDLE_GEMFILE environment variable set' do
@@ -95,6 +104,104 @@ module LicensePatrol
           expect(::Bundler::Definition).to receive(:build).with(custom_gemfile.join('Gemfile-other'), custom_gemfile.join('Gemfile-other.lock'), nil).and_return(definition)
           expect(subject.current_packages).to_not be_empty
         end
+      end
+
+      context 'with the BUNDLE_GEMFILE environment variable set to a project nested directory' do
+        around do |example|
+          old_var = ENV['BUNDLE_GEMFILE']
+          ENV['BUNDLE_GEMFILE'] = 'gemfiles/nested.gemfile'
+          example.run
+          ENV['BUNDLE_GEMFILE'] = old_var
+        end
+
+        it 'uses the BUNDLE_GEMFILE variable to identify the gemfile' do
+          expect(::Bundler::Definition).to receive(:build).with(custom_gemfile.join('gemfiles/nested.gemfile'), custom_gemfile.join('gemfiles/nested.gemfile.lock'), nil).and_return(definition)
+          expect(subject.current_packages).to_not be_empty
+        end
+
+        it 'points BUNDLE_GEMFILE to the gemfile in the project while reading it' do
+          expect(::Bundler::Definition).to receive(:build) do
+            expect(ENV['BUNDLE_GEMFILE']).to eq(custom_gemfile.join('gemfiles/nested.gemfile').to_s)
+            definition
+          end
+          subject.current_packages
+        end
+
+        it 'restores BUNDLE_GEMFILE afterwards' do
+          allow(::Bundler::Definition).to receive(:build).and_return(definition)
+          subject.current_packages
+          expect(ENV['BUNDLE_GEMFILE']).to eq('gemfiles/nested.gemfile')
+        end
+      end
+
+      context 'with the BUNDLE_GEMFILE environment variable set to an absolute path inside the project (as through bundle exec)' do
+        around do |example|
+          old_var = ENV['BUNDLE_GEMFILE']
+          ENV['BUNDLE_GEMFILE'] = custom_gemfile.join('gemfiles/nested.gemfile').to_s
+          example.run
+          ENV['BUNDLE_GEMFILE'] = old_var
+        end
+
+        it 'uses the BUNDLE_GEMFILE variable to identify the gemfile' do
+          expect(::Bundler::Definition).to receive(:build).with(custom_gemfile.join('gemfiles/nested.gemfile'), custom_gemfile.join('gemfiles/nested.gemfile.lock'), nil).and_return(definition)
+          expect(subject.current_packages).to_not be_empty
+        end
+
+        it 'points BUNDLE_GEMFILE to the gemfile in the project while reading it' do
+          expect(::Bundler::Definition).to receive(:build) do
+            expect(ENV['BUNDLE_GEMFILE']).to eq(custom_gemfile.join('gemfiles/nested.gemfile').to_s)
+            definition
+          end
+          subject.current_packages
+        end
+      end
+
+      context 'with the BUNDLE_GEMFILE environment variable set to an absolute path outside the project (as through bundle exec with --project_path)' do
+        around do |example|
+          old_var = ENV['BUNDLE_GEMFILE']
+          ENV['BUNDLE_GEMFILE'] = '/some/other/project/Gemfile-other'
+          example.run
+          ENV['BUNDLE_GEMFILE'] = old_var
+        end
+
+        it 'uses the gemfile with the same name in the project' do
+          expect(::Bundler::Definition).to receive(:build).with(custom_gemfile.join('Gemfile-other'), custom_gemfile.join('Gemfile-other.lock'), nil).and_return(definition)
+          expect(subject.current_packages).to_not be_empty
+        end
+      end
+    end
+
+    describe 'reading the bundler config of a nested gemfile' do
+      let(:project_path) { Pathname(Dir.mktmpdir) }
+
+      around do |example|
+        old_var = ENV['BUNDLE_GEMFILE']
+        ENV['BUNDLE_GEMFILE'] = 'gemfiles/nested.gemfile'
+        example.run
+        ENV['BUNDLE_GEMFILE'] = old_var
+        FileUtils.rm_rf(project_path)
+      end
+
+      before do
+        FileUtils.mkdir_p(project_path.join('gemfiles/.bundle'))
+        FileUtils.touch(project_path.join('gemfiles/nested.gemfile'))
+        FileUtils.touch(project_path.join('gemfiles/nested.gemfile.lock'))
+        allow(::Bundler::Definition).to receive(:build).and_return(definition)
+      end
+
+      subject { Bundler.new(project_path: project_path, ignored_groups: Set.new) }
+
+      it 'configures bundler when the config next to the gemfile sets BUNDLE_PATH (vendored gems)' do
+        File.write(project_path.join('gemfiles/.bundle/config'), "---\nBUNDLE_PATH: \"vendor/bundle\"\n")
+        expect(::Bundler).to receive(:reset!)
+        expect(::Bundler).to receive(:configure)
+        subject.current_packages
+      end
+
+      it 'does not configure bundler otherwise' do
+        expect(::Bundler).to_not receive(:reset!)
+        expect(::Bundler).to_not receive(:configure)
+        subject.current_packages
       end
     end
   end
