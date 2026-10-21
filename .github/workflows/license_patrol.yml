@@ -9,7 +9,5 @@ jobs:
     with:
       package: ${{ github.workflow }}
       ruby: '["3.3"]'
-      before_build: |
-        go install github.com/tools/godep@latest
-        echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      before_build: ci/scripts/install-test-tools.sh
     secrets: inherit
