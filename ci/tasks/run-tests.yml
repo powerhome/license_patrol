@@ -1,10 +1,10 @@
 platform: linux
 
 inputs:
-- name: LicenseFinder
+- name: LicensePatrol
 
 run:
-  path: ./LicenseFinder/ci/scripts/run-tests.sh
+  path: ./LicensePatrol/ci/scripts/run-tests.sh
 
 params:
   RUBY_VERSION_UNDER_TEST:

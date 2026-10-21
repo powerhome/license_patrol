@@ -2,7 +2,7 @@
 
 require 'rubygems'
 require 'bundler/setup'
-require 'license_finder'
+require 'license_patrol'
 
 require 'rspec'
 require 'webmock/rspec'
@@ -25,5 +25,5 @@ RSpec.configure do |config|
     end
   end
 
-  config.include LicenseFinder::TestFixtures
+  config.include LicensePatrol::TestFixtures
 end

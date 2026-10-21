@@ -1,0 +1,178 @@
+# frozen_string_literal: true
+
+require 'spec_helper'
+
+module LicensePatrol
+  describe Maven do
+    let(:options) { {} }
+
+    subject { Maven.new(options.merge(project_path: Pathname('/fake/path'))) }
+
+    it_behaves_like 'a PackageManager'
+
+    def license_xml(xml)
+      <<-RESP
+        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <licenseSummary>
+          <dependencies>
+            #{xml}
+          </dependencies>
+        </licenseSummary>
+      RESP
+    end
+
+    def license_xml_parsed(xml)
+      options = {
+        'GroupTags' => { 'licenses' => 'license', 'dependencies' => 'dependency' },
+        'ForceArray' => %w[license dependency]
+      }
+      XmlSimple.xml_in(license_xml(xml), options)['dependencies']
+    end
+
+    describe '.current_packages' do
+      before do
+        allow(Dir).to receive(:chdir).with(Pathname('/fake/path')) { |&block| block.call }
+        allow(SharedHelpers::Cmd).to receive(:run).with('mvn org.codehaus.mojo:license-maven-plugin:download-licenses').and_return(['', '', cmd_success])
+        allow(SharedHelpers::Cmd).to receive(:run).with('mvn help:evaluate -Dexpression=settings.localRepository -q -DforceStdout').and_return(['', '', cmd_success])
+      end
+
+      def stub_license_report(deps)
+        dependencies = double(:subject_dependency_file, dependencies: license_xml_parsed(deps))
+        expect(MavenDependencyFinder).to receive(:new).and_return(dependencies)
+      end
+
+      it 'uses the maven wrapper, if present' do
+        subject = Maven.new(project_path: Pathname('features/fixtures/maven-wrapper'))
+        allow(SharedHelpers::Cmd).to receive(:run).with('features/fixtures/maven-wrapper/mvnw org.codehaus.mojo:license-maven-plugin:download-licenses').and_return(['', '', cmd_success])
+        allow(SharedHelpers::Cmd).to receive(:run).with('features/fixtures/maven-wrapper/mvnw help:evaluate -Dexpression=settings.localRepository -q -DforceStdout').and_return(['', '', cmd_success])
+        expect(Dir).to receive(:chdir).twice.with(Pathname('features/fixtures/maven-wrapper')).and_call_original
+        expect(subject.package_management_command).to eq('features/fixtures/maven-wrapper/mvnw').or eq('features/fixtures/maven-wrapper/mvnw.cmd')
+        subject.current_packages
+      end
+
+      it 'lists all the current packages' do
+        stub_license_report("
+          <dependency>
+            <groupId>org.otherorg</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+          </dependency>
+          <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <version>1.3</version>
+           </dependency>
+        ")
+
+        expect(subject.current_packages.map { |p| [p.name, p.version] }).to eq [
+          ['junit', '4.11'],
+          ['hamcrest-core', '1.3']
+        ]
+      end
+
+      context 'when ignored_groups is used' do
+        subject do
+          Maven.new(options.merge(
+                      project_path: Pathname('/fake/path'),
+                      ignored_groups: Set.new(%w[system test provided import])
+                    ))
+        end
+
+        let(:command) do
+          'mvn org.codehaus.mojo:license-maven-plugin:download-licenses -Dlicense.excludedScopes=system,test,provided,import'
+        end
+
+        before do
+          expect(SharedHelpers::Cmd).to receive(:run)
+                                          .with(command)
+                                          .and_return(['', '', cmd_success])
+        end
+
+        it 'uses skips the specified groups' do
+          subject.current_packages
+        end
+      end
+
+      it 'handles multiple licenses' do
+        stub_license_report("
+          <dependency>
+            <licenses>
+              <license>
+                <name>License 1</name>
+              </license>
+              <license>
+                <name>License 2</name>
+              </license>
+            </licenses>
+          </dependency>
+        ")
+
+        expect(subject.current_packages.first.licenses.map(&:name)).to eq ['License 1', 'License 2']
+      end
+
+      context 'when maven group ids option is enabled' do
+        let(:options) { { maven_include_groups: true } }
+
+        it 'lists all the current packages' do
+          stub_license_report("
+            <dependency>
+              <groupId>junit</groupId>
+              <artifactId>junit</artifactId>
+              <version>4.11</version>
+            </dependency>
+            <dependency>
+              <groupId>org.hamcrest</groupId>
+              <artifactId>hamcrest-core</artifactId>
+              <version>1.3</version>
+            </dependency>
+          ")
+
+          expect(subject.current_packages.map { |p| [p.name, p.version] }).to eq [
+            ['junit:junit', '4.11'],
+            ['org.hamcrest:hamcrest-core', '1.3']
+          ]
+        end
+      end
+
+      it 'handles no licenses' do
+        stub_license_report("
+          <dependency>
+          </dependency>
+        ")
+
+        expect(subject.current_packages.first.licenses.map(&:name)).to eq ['unknown']
+      end
+    end
+    describe '.project_root?' do
+      context 'when dealing with root maven project' do
+        subject { Maven.new(options.merge(project_path: Pathname(fixture_path('maven-with-subprojects').to_s))) }
+
+        it 'returns true' do
+          expect(subject.project_root?).to be true
+        end
+      end
+      context 'when dealing with a maven subproject' do
+        subject { Maven.new(options.merge(project_path: Pathname(fixture_path('maven-with-subprojects/subprojectB').to_s))) }
+
+        it 'returns false' do
+          expect(subject.project_root?).to eq(false)
+        end
+      end
+      context 'when fetching module properties fail' do
+        it 'raises an error' do
+          FakeFS do
+            FileUtils.mkdir_p '/fake/path'
+            FileUtils.touch '/fake/path/pom.xml'
+
+            expect(SharedHelpers::Cmd).to receive(:run)
+              .with('mvn help:evaluate -Dexpression=project.parent -q -DforceStdout')
+              .and_return(['error', '', cmd_failure])
+
+            expect { subject.project_root? }
+              .to raise_error(%r{Command 'mvn help:evaluate -Dexpression=project.parent -q -DforceStdout' failed to execute in /fake/path: error})
+          end
+        end
+      end
+    end
+  end
+end

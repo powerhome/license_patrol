@@ -4,14 +4,14 @@ require 'delegate'
 require 'English'
 require 'json'
 
-module LicenseFinder
+module LicensePatrol
   module TestingDSL
     class User
-      def run_license_finder(path = nil, options = '')
+      def run_license_patrol(path = nil, options = '')
         if path
-          execute_command_in_path("license_finder --quiet #{options}", Paths.project("my_app/#{path}"))
+          execute_command_in_path("license_patrol --quiet #{options}", Paths.project("my_app/#{path}"))
         else
-          execute_command "license_finder --quiet #{options}"
+          execute_command "license_patrol --quiet #{options}"
         end
       end
 
@@ -60,7 +60,7 @@ module LicenseFinder
       end
 
       def view_html
-        execute_command 'license_finder report --format html'
+        execute_command 'license_patrol report --format html'
         HtmlReport.from_string(@output)
       end
 
@@ -583,7 +583,7 @@ module LicenseFinder
     class BundlerProject < Project
       def add_dep
         add_to_gemfile("source 'https://rubygems.org'")
-        add_to_gemfile("gem 'license_finder', path: #{Paths.root.to_s.inspect}")
+        add_to_gemfile("gem 'license_patrol', path: #{Paths.root.to_s.inspect}")
       end
 
       def install
@@ -639,7 +639,7 @@ module LicenseFinder
     class GitBundlerProject < Project
       def add_dep
         add_to_gemfile("source 'https://rubygems.org'")
-        add_to_gemfile("gem 'license_finder', git: #{Paths.root.to_s.inspect}")
+        add_to_gemfile("gem 'license_patrol', git: #{Paths.root.to_s.inspect}")
       end
 
       def install
@@ -706,7 +706,7 @@ module LicenseFinder
         s.name = "#{name}"
         s.version = "#{options[:version] || '0.0.0'}"
         s.license = "#{options.fetch(:license)}"
-        s.author = "license_finder tests"
+        s.author = "license_patrol tests"
         s.summary = "#{options[:summary]}"
         s.description = "#{options[:description]}"
         s.homepage = "#{options[:homepage]}"
@@ -788,7 +788,7 @@ module LicenseFinder
       extend self
 
       def root
-        # where license_finder is installed
+        # where license_patrol is installed
         ProjectDir.new(Pathname.new(__FILE__).dirname.join('..', '..').realpath)
       end
 

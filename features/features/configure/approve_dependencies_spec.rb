@@ -7,17 +7,17 @@ describe 'Manually Approved Dependencies' do
   # I want to approve dependencies without permitting their licenses
   # So that my business can track individual dependencies which it has approved
 
-  let(:developer) { LicenseFinder::TestingDSL::User.new }
-  let(:product_owner) { LicenseFinder::TestingDSL::User.new }
+  let(:developer) { LicensePatrol::TestingDSL::User.new }
+  let(:product_owner) { LicensePatrol::TestingDSL::User.new }
 
   before do
     developer.create_empty_project
-    developer.execute_command 'license_finder dependencies add manual_dep MIT 1.2.3'
-    developer.execute_command 'license_finder approval add manual_dep --who "Julian" --why "We really need this"'
+    developer.execute_command 'license_patrol dependencies add manual_dep MIT 1.2.3'
+    developer.execute_command 'license_patrol approval add manual_dep --who "Julian" --why "We really need this"'
   end
 
   specify 'do not appear in action items' do
-    developer.run_license_finder
+    developer.run_license_patrol
     expect(developer).to_not be_seeing 'manual_dep'
   end
 
@@ -33,17 +33,17 @@ describe 'Manually Approved Dependencies' do
 
   specify 'reports unapproved dependencies' do
     developer.create_empty_project
-    developer.execute_command('license_finder dependencies add test_gem Random_License 0.0.1')
-    developer.execute_command('license_finder approvals add test_gem')
+    developer.execute_command('license_patrol dependencies add test_gem Random_License 0.0.1')
+    developer.execute_command('license_patrol approvals add test_gem')
 
-    developer.run_license_finder
+    developer.run_license_patrol
 
     expect(developer).to be_receiving_exit_code(0)
     expect(developer).not_to be_seeing 'test_gem'
 
-    developer.execute_command('license_finder approvals remove test_gem')
+    developer.execute_command('license_patrol approvals remove test_gem')
 
-    developer.run_license_finder
+    developer.run_license_patrol
 
     expect(developer).to be_receiving_exit_code(1)
     expect(developer).to be_seeing 'test_gem'
@@ -51,11 +51,11 @@ describe 'Manually Approved Dependencies' do
 
   specify 'reports only unapproved dependencies, no approved dependencies' do
     developer.create_empty_project
-    developer.execute_command('license_finder dependencies add unapproved_gem Random_License 0.0.1')
-    developer.execute_command('license_finder dependencies add approved_gem Random_License 0.0.1')
-    developer.execute_command('license_finder approvals add approved_gem')
+    developer.execute_command('license_patrol dependencies add unapproved_gem Random_License 0.0.1')
+    developer.execute_command('license_patrol dependencies add approved_gem Random_License 0.0.1')
+    developer.execute_command('license_patrol approvals add approved_gem')
 
-    developer.run_license_finder
+    developer.run_license_patrol
     expect(developer).to be_receiving_exit_code(1)
     expect(developer).to be_seeing 'unapproved_gem'
     expect(developer).not_to be_seeing 'approved_gem '

@@ -7,13 +7,13 @@ describe 'Project name' do
   # I want to assign a name for my project
   # So that product owners see it in the reports
 
-  let(:developer) { LicenseFinder::TestingDSL::User.new }
-  let(:product_owner) { LicenseFinder::TestingDSL::User.new }
+  let(:developer) { LicensePatrol::TestingDSL::User.new }
+  let(:product_owner) { LicensePatrol::TestingDSL::User.new }
 
   before { developer.create_empty_project }
 
   specify 'appears in the HTML report' do
-    developer.execute_command 'license_finder project_name add changed_name'
+    developer.execute_command 'license_patrol project_name add changed_name'
 
     expect(product_owner.view_html).to be_titled 'changed_name'
   end
@@ -23,13 +23,13 @@ describe 'Project name' do
   end
 
   specify 'appears in the CLI' do
-    developer.execute_command 'license_finder project_name add my_proj'
+    developer.execute_command 'license_patrol project_name add my_proj'
     expect(developer).to be_seeing 'my_proj'
-    developer.execute_command 'license_finder project_name show'
+    developer.execute_command 'license_patrol project_name show'
     expect(developer).to be_seeing 'my_proj'
 
-    developer.execute_command 'license_finder project_name remove'
-    developer.execute_command 'license_finder project_name show'
+    developer.execute_command 'license_patrol project_name remove'
+    developer.execute_command 'license_patrol project_name show'
     expect(developer).to_not be_seeing 'my_proj'
   end
 end

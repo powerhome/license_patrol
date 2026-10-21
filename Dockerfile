@@ -90,7 +90,7 @@ RUN wget https://storage.googleapis.com/golang/go$GO_LANG_VERSION.linux-amd64.ta
 ENV GOROOT /go
 ENV PATH=$PATH:/go/bin
 
-# godep is now required for license_finder to work for project that are still managed with GoDep
+# godep is now required for license_patrol to work for project that are still managed with GoDep
 ENV GOROOT=/go
 ENV GOPATH=/gopath
 ENV PATH=$PATH:$GOPATH/bin
@@ -266,9 +266,9 @@ RUN flutter create --template=app ${TEMP}/app_sample \
     && flutter create --template=package ${TEMP}/package_sample \
     && flutter create --template=plugin ${TEMP}/plugin_sample
 
-# install license_finder
-COPY . /LicenseFinder
-RUN bash -lc "cd /LicenseFinder && bundle config set no-cache 'true' && bundle install -j4 && bundle pristine && rake install"
+# install license_patrol
+COPY . /LicensePatrol
+RUN bash -lc "cd /LicensePatrol && bundle config set no-cache 'true' && bundle install -j4 && bundle pristine && rake install"
 
 WORKDIR /
 

@@ -7,10 +7,10 @@ image_resource:
     tag: latest
 
 inputs:
-- name: LicenseFinder
+- name: LicensePatrol
 
 run:
-  path: ./LicenseFinder/ci/scripts/containerize-tests.sh
+  path: ./LicensePatrol/ci/scripts/containerize-tests.sh
 
 params:
   RUBY_VERSION_UNDER_TEST:

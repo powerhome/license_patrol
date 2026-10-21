@@ -21,7 +21,7 @@ resources:
 - name: lf-git
   type: git
   source:
-    uri: git@github.com:pivotal/LicenseFinder.git
+    uri: git@github.com:powerhome/license_patrol.git
     private_key: ((github-cf-osl-bot-private-key))
     branch: master
 
@@ -30,7 +30,7 @@ resources:
   check_every: 24h
   webhook_token: ((github-pull-request-webhook-token))
   source:
-    repository: pivotal/LicenseFinder
+    repository: powerhome/license_patrol
     access_token: ((github-api-pull-request-token))
 
 - name: dockerhub-pr
@@ -89,7 +89,7 @@ jobs:
     file: lf-git/ci/tasks/run-tests.yml
     params:
       RUBY_VERSION_UNDER_TEST: <%= ruby_version %>
-    input_mapping: { LicenseFinder: github-pull-request }
+    input_mapping: { LicensePatrol: github-pull-request }
     on_success:
       put: github-pull-request
       params:
@@ -108,7 +108,7 @@ jobs:
     params:
       channel: '<%= slack_channel %>'
       icon_emoji: ':crying_cat_face:'
-      text: '<%= "License Finder build failed. Build: https://norsk.cf-app.com/teams/main/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" %>'
+      text: '<%= "License Patrol build failed. Build: https://norsk.cf-app.com/teams/main/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" %>'
 <% end %>
 <% end %>
 
@@ -123,7 +123,7 @@ jobs:
   - task: run-rubocop
     privileged: true
     file: lf-git/ci/tasks/rubocop.yml
-    input_mapping: { LicenseFinder: github-pull-request }
+    input_mapping: { LicensePatrol: github-pull-request }
     on_success:
       put: github-pull-request
       params:
