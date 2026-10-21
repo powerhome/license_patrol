@@ -9,5 +9,5 @@ jobs:
     with:
       package: ${{ github.workflow }}
       ruby: '["3.3"]'
-      before_build: ci/scripts/install-test-tools.sh
+      before_build: .github/workflows/install-test-tools.sh
     secrets: inherit
