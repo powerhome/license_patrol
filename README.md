@@ -473,7 +473,7 @@ of them to `--bundler_gemfiles`, relative to the project path. Glob patterns are
 accepted, as long as they are quoted:
 
 ```
-$ license_finder --bundler_gemfiles Gemfile 'gemfiles/*.gemfile'
+$ license_patrol --bundler_gemfiles Gemfile 'gemfiles/*.gemfile'
 ```
 
 Every gem locked by any of the gemfiles will be reported, once per version.
