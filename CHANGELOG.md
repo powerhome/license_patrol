@@ -1,3 +1,7 @@
+# [1.0.0] / Unreleased
+
+First release as `license_patrol`, forked from LicenseFinder 7.2.1. Earlier entries are LicenseFinder's history.
+
 # [7.2.1] / 2024-05-08
 
 # [7.2.0] / 2024-05-07
