@@ -1,0 +1,13 @@
+name: license_patrol
+
+on:
+  push:
+
+jobs:
+  ruby:
+    uses: powerhome/github-actions-workflows/.github/workflows/ruby-gem.yml@main
+    with:
+      package: ${{ github.workflow }}
+      ruby: '["3.3"]'
+      before_build: .github/workflows/install-test-tools.sh
+    secrets: inherit
