@@ -1,4 +1,9 @@
-# [1.0.0] / Unreleased
+# [1.1.0] / 2026-10-21
+
+### Added
+* `bundler_gemfiles` option to scan many gemfiles, such as Appraisal's `gemfiles/*.gemfile`, in one run - [5d7e1372](https://github.com/powerhome/license_patrol/commit/5d7e1372) - Carlos Palhares
+
+# [1.0.0] / 2026-10-21
 
 First release as `license_patrol`, forked from LicenseFinder 7.2.1. Earlier entries are LicenseFinder's history.
 
@@ -1068,3 +1073,5 @@ Bugfixes:
 [7.1.0]: https://github.com/pivotal/LicenseFinder/compare/v7.0.1...v7.1.0
 [7.2.0]: https://github.com/pivotal/LicenseFinder/compare/v7.1.0...v7.2.0
 [7.2.1]: https://github.com/pivotal/LicenseFinder/compare/v7.2.0...v7.2.1
+[1.0.0]: https://github.com/powerhome/license_patrol/releases/tag/v1.0.0
+[1.1.0]: https://github.com/powerhome/license_patrol/compare/v1.0.0...v1.1.0
