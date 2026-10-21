@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module LicenseFinder
+module LicensePatrol
   shared_examples 'a PackageManager' do
     let(:all_pms) { fixture_path('all_pms') }
 

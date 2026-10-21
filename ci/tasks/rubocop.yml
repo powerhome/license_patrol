@@ -9,7 +9,7 @@ image_resource:
     password: ((license-finder-docker-password))
 
 inputs:
-- name: LicenseFinder
+- name: LicensePatrol
 
 run:
-  path: ./LicenseFinder/ci/scripts/run-rubocop.sh
+  path: ./LicensePatrol/ci/scripts/run-rubocop.sh

@@ -2,7 +2,7 @@
 
 require 'rubygems'
 require 'bundler/setup'
-require 'license_finder'
+require 'license_patrol'
 
 require 'rspec'
 require 'webmock/rspec'
@@ -32,5 +32,5 @@ RSpec.configure do |config|
     FileUtils.mv(doc_backup, doc_dir) if doc_backup.directory?
   end
 
-  config.include LicenseFinder::TestFixtures
+  config.include LicensePatrol::TestFixtures
 end

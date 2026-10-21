@@ -6,7 +6,7 @@
 GRADLE_VERSION=5.6.4
 JDK_VERSION=11
 
-TOOLS_DIR="${RUNNER_TEMP:-/tmp}/license_finder-tools"
+TOOLS_DIR="${RUNNER_TEMP:-/tmp}/license_patrol-tools"
 mkdir -p "$TOOLS_DIR"
 
 # godep

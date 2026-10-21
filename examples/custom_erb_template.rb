@@ -10,15 +10,15 @@ require 'bundler/setup'
 # > bundle install
 # > ./custom_erb_template.rb
 
-require 'license_finder'
+require 'license_patrol'
 
-# See lib/license_finder/core.rb for more configuration options.
+# See lib/license_patrol/core.rb for more configuration options.
 # A quiet logger is required when running reports...
-lf = LicenseFinder::Core.new(LicenseFinder::Configuration.with_optional_saved_config(logger: :quiet))
+lf = LicensePatrol::Core.new(LicensePatrol::Configuration.with_optional_saved_config(logger: :quiet))
 
 # Find many more examples of complex ERB templates in
-# lib/license_finder/reports/templates/
+# lib/license_patrol/reports/templates/
 template = Pathname.new('./sample_template.erb')
-print LicenseFinder::ErbReport
+print LicensePatrol::ErbReport
   .new(lf.acknowledged, project_name: lf.project_name)
   .to_s(template)

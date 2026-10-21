@@ -7,8 +7,8 @@ describe 'HTML report' do
   # I want an HTML report
   # So that I can easily review my application's dependencies and licenses
 
-  let(:developer) { LicenseFinder::TestingDSL::User.new }
-  let(:product_owner) { LicenseFinder::TestingDSL::User.new }
+  let(:developer) { LicensePatrol::TestingDSL::User.new }
+  let(:product_owner) { LicensePatrol::TestingDSL::User.new }
 
   specify 'shows basic dependency data' do
     gem_name = 'a_gem'
@@ -37,9 +37,9 @@ describe 'HTML report' do
 
   specify 'shows approval status of dependencies' do
     developer.create_empty_project
-    developer.execute_command 'license_finder dependencies add gpl_dep GPL 1.2'
-    developer.execute_command 'license_finder dependencies add mit_dep MIT 2.3'
-    developer.execute_command 'license_finder permitted_licenses add MIT'
+    developer.execute_command 'license_patrol dependencies add gpl_dep GPL 1.2'
+    developer.execute_command 'license_patrol dependencies add mit_dep MIT 2.3'
+    developer.execute_command 'license_patrol permitted_licenses add MIT'
 
     html = product_owner.view_html
     expect(html).to be_unapproved 'gpl_dep'

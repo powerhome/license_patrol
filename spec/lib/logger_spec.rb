@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LicenseFinder::Logger do
+describe LicensePatrol::Logger do
   let(:system_logger) { double(:logger, :formatter= => true, :level= => true) }
 
   before do
@@ -22,7 +22,7 @@ describe LicenseFinder::Logger do
     logged_string = "#{prefix}: #{string}"
     subject = described_class.new(mode: :info)
 
-    [LicenseFinder::Logger::MODE_INFO, LicenseFinder::Logger::MODE_DEBUG].each do |level|
+    [LicensePatrol::Logger::MODE_INFO, LicensePatrol::Logger::MODE_DEBUG].each do |level|
       expect(system_logger).to receive(level).with(logged_string)
       subject.send(level, prefix, string)
     end
@@ -40,7 +40,7 @@ describe LicenseFinder::Logger do
     it 'should not log any information' do
       subject = described_class.new(:quiet)
 
-      [LicenseFinder::Logger::MODE_INFO, LicenseFinder::Logger::MODE_DEBUG].each do |level|
+      [LicensePatrol::Logger::MODE_INFO, LicensePatrol::Logger::MODE_DEBUG].each do |level|
         expect(system_logger).to_not receive(level)
         subject.send(level, 'prefix', 'string')
       end

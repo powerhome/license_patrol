@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-* Fork the project from https://github.com/pivotal/LicenseFinder
+* Fork the project from https://github.com/powerhome/license_patrol
 * Create a feature branch.
 * Make your feature addition or bug fix. Please make sure there is appropriate test coverage.
 * Rebase on top of master.
@@ -11,7 +11,7 @@
 ## Running Tests
 
 You can use the [LicenseFinder docker image](https://hub.docker.com/r/licensefinder/license_finder/) to run the tests by using the `dlf` script.
-There are 2 sets of tests to run in order to confirm that License Finder is working as intended:
+There are 2 sets of tests to run in order to confirm that License Patrol is working as intended:
 
 ```
 ./dlf rake spec
@@ -37,36 +37,36 @@ docker run -v $PWD:/scan -it licensefinder/license_finder /bin/bash -l
 ## Adding Package Managers
 
 There are a few steps to adding a new package manager.
-The main things which need to be implemented are mentioned in [Package Manager](https://github.com/pivotal/LicenseFinder/blob/master/lib/license_finder/package_manager.rb).
+The main things which need to be implemented are mentioned in [Package Manager](https://github.com/powerhome/license_patrol/blob/master/lib/license_patrol/package_manager.rb).
 
 [Here](https://github.com/pivotal/LicenseFinder/compare/v2.0.0...v2.0.1) is how
 support was added for `rebar`, an `erlang` package manager.
 
 There are feature tests and unit tests for each currently supported package manager.
-* [Feature test example](https://github.com/pivotal/LicenseFinder/blob/master/features/features/package_managers/gvt_spec.rb)
-* [Unit test example](https://github.com/pivotal/LicenseFinder/blob/master/spec/lib/license_finder/package_managers/gvt_spec.rb)
+* [Feature test example](https://github.com/powerhome/license_patrol/blob/master/features/features/package_managers/gvt_spec.rb)
+* [Unit test example](https://github.com/powerhome/license_patrol/blob/master/spec/lib/license_patrol/package_managers/gvt_spec.rb)
 
 ## Adding Licenses
 
-Add new licenses to `lib/license_finder/license/definitions.rb`.  There are
+Add new licenses to `lib/license_patrol/license/definitions.rb`.  There are
 existing tools for matching licenses; see, for example, the MIT license, which
 can be detected in many different ways.
 
 
 ## Adding Reports
 
-If you need `license_finder` to output additional package data, consider
+If you need `license_patrol` to output additional package data, consider
 submitting a pull request which adds new columns to
-`lib/license_finder/reports/csv_report.rb`.
+`lib/license_patrol/reports/csv_report.rb`.
 
 It is also possible to generate a custom report from an ERB template.  Use this
-[example](https://github.com/pivotal/LicenseFinder/blob/master/examples/custom_erb_template.rb) as a starting
+[example](https://github.com/powerhome/license_patrol/blob/master/examples/custom_erb_template.rb) as a starting
 point.  These reports will have access to the helpers in
-[`LicenseFinder::ErbReport`](https://github.com/pivotal/LicenseFinder/blob/master/lib/license_finder/reports/erb_report.rb).
+[`LicensePatrol::ErbReport`](https://github.com/powerhome/license_patrol/blob/master/lib/license_patrol/reports/erb_report.rb).
 
 If you need a report with more detailed data or in a different format, we
 recommend writing a custom ruby script.  This
-[example](https://github.com/pivotal/LicenseFinder/blob/master/examples/extract_license_data.rb) will get you
+[example](https://github.com/powerhome/license_patrol/blob/master/examples/extract_license_data.rb) will get you
 started.
 
 If you come up with something useful, consider posting it to the Google Group

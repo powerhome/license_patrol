@@ -1,6 +1,6 @@
 platform: windows
 inputs:
-- name: LicenseFinder
+- name: LicensePatrol
 run:
   path: powershell
-  args: ["-File", "LicenseFinder/ci/scripts/test.ps1"]
+  args: ["-File", "LicensePatrol/ci/scripts/test.ps1"]

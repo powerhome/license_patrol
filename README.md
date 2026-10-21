@@ -1,4 +1,6 @@
-# License Finder
+# License Patrol
+
+License Patrol is a fork of [LicenseFinder](https://github.com/pivotal/LicenseFinder).
 
 [![Code Climate](https://codeclimate.com/github/pivotal/LicenseFinder.png)](https://codeclimate.com/github/pivotal/LicenseFinder)
 
@@ -9,15 +11,15 @@ Build status
 * Ruby 3.3.0 [![Ruby 3.3.0 build status](https://norsk.cf-app.com/api/v1/teams/main/pipelines/LicenseFinder/jobs/ruby-3.3.0/badge)](https://norsk.cf-app.com/teams/main/pipelines/LicenseFinder)
 
 
-LicenseFinder works with your package managers to find dependencies,
+LicensePatrol works with your package managers to find dependencies,
 detect the licenses of the packages in them, compare those licenses
 against a user-defined list of permitted licenses,
 and give you an actionable exception report.
 
-* code: https://github.com/pivotal/LicenseFinder
+* code: https://github.com/powerhome/license_patrol
 * ci: https://norsk.cf-app.com/teams/main/pipelines/LicenseFinder
 * docker: [licensefinder/license_finder](https://hub.docker.com/r/licensefinder/license_finder/)
-  * the docker image contains all the package managers needed to run `license_finder`
+  * the docker image contains all the package managers needed to run `license_patrol`
 * support:
   * The primary form of communication for support is through github issues. The google groups are not actively
     monitored
@@ -56,18 +58,18 @@ and give you an actionable exception report.
 
 ## Installation
 
-License Finder may be run as a [pre-commit](https://pre-commit.com) hook by
+License Patrol may be run as a [pre-commit](https://pre-commit.com) hook by
 adding the following to your `.pre-commit-config.yaml`:
 
 ```yaml
 repos:
-  - repo: https://github.com/pivotal/LicenseFinder
+  - repo: https://github.com/powerhome/license_patrol
     rev: v7.1.0 # You probably want the latest tag.
     hooks:
-      - id: license-finder
+      - id: license-patrol
 ```
 
-Running License Finder directly requires Ruby 2.6.0 or greater. If you have an
+Running License Patrol directly requires Ruby 2.6.0 or greater. If you have an
 older version of Ruby installed, you can update via Homebrew:
 
 ```sh
@@ -80,21 +82,21 @@ then:
 $ brew install ruby
 ```
 
-The easiest way to use `license_finder` directly is to install it as a command
+The easiest way to use `license_patrol` directly is to install it as a command
 line tool, like brew, awk, gem or bundler:
 
 ```sh
-$ gem install license_finder
+$ gem install license_patrol
 ```
 
 Though it's less preferable, if you are using bundler in a Ruby
-project, you can add `license_finder` to your Gemfile:
+project, you can add `license_patrol` to your Gemfile:
 
 ```ruby
-gem 'license_finder', :group => :development
+gem 'license_patrol', :group => :development
 ```
 
-This approach helps you remember to install `license_finder`, but can
+This approach helps you remember to install `license_patrol`, but can
 pull in unwanted dependencies, including `bundler`. To mitigate this
 problem, see [Excluding Dependencies](#excluding-dependencies).
 
@@ -103,20 +105,20 @@ problem, see [Excluding Dependencies](#excluding-dependencies).
 
 Make sure your dependencies are installed (with your package manager's install command: `bundle install`, `npm install`, etc.)
 
-The first time you run `license_finder` it will list all your project's packages.
+The first time you run `license_patrol` it will list all your project's packages.
 
 ```sh
-$ license_finder
+$ license_patrol
 ```
 
 Or, if you installed with bundler:
 
 ```sh
-$ bundle exec license_finder
+$ bundle exec license_patrol
 ```
 
 The output will report that none of your packages have been
-approved.  Over time you will tell `license_finder` which packages
+approved.  Over time you will tell `license_patrol` which packages
 are approved, so when you run this command in the future, it will
 report current action items; i.e., packages that are new or have
 never been approved.
@@ -125,7 +127,7 @@ If you don't wish to see progressive output "dots", use the `--quiet`
 option.
 
 If you'd like to see debugging output, use the `--debug`
-option. `license_finder` will then output info about packages, their
+option. `license_patrol` will then output info about packages, their
 dependencies, and where and how each license was discovered. This can
 be useful when you need to track down an unexpected package or
 license.
@@ -134,17 +136,17 @@ If you do not want to manually run an individual package manager's prepare
 command (ex: `bundle install`, `npm install`, etc) to ensure your project
 is fully prepared to be scanned, use the `--prepare` or `-p` option which will run
 each active package manager's prepare command for you. If you would like to continue
-running `license_finder` even if there is an issue with a prepare step, use the
+running `license_patrol` even if there is an issue with a prepare step, use the
 `--prepare-no-fail` option which prepares but carries on despite any potential failures.
 
-Run `license_finder help` to see other available commands, and
-`license_finder help [COMMAND]` for detailed help on a specific
+Run `license_patrol help` to see other available commands, and
+`license_patrol help [COMMAND]` for detailed help on a specific
 command.
 
 ### Docker
 
 If you have docker installed, try using the included `dlf` script (potentially
-symlinked to be in your path via `ln -s LicenseFinder/dlf /usr/local/bin` or
+symlinked to be in your path via `ln -s LicensePatrol/dlf /usr/local/bin` or
 whatever method you prefer). This will run any commands passed to it inside a
 pre-provisioned Docker container to maintain consistent versions of all the
 package managers. For example,
@@ -153,13 +155,13 @@ package managers. For example,
 $ dlf npm --version
 5.3.0
 
-$ dlf license_finder --help
+$ dlf license_patrol --help
 
 Dependencies that need approval:
 ...
-license_finder, 3.0.3, MIT
+license_patrol, 3.0.3, MIT
 
-$ dlf "bundle install && license_finder"
+$ dlf "bundle install && license_patrol"
 ```
 
 You can better understand the way this script works by looking at its source, but for
@@ -168,13 +170,13 @@ passed to it from that directory. If your command has `&&`, ensure you quote the
 If it does not, ensure the command is not quoted.
 
 Note that the docker image will run the gem which is installed within it.
-So the docker image tagged `7.0.0` will run *License Finder Version 7.0.0*
+So the docker image tagged `7.0.0` will run *License Patrol Version 7.0.0*
 
-See the [contributing guide](https://github.com/pivotal/LicenseFinder/blob/master/CONTRIBUTING.md) for information on development. 
+See the [contributing guide](https://github.com/powerhome/license_patrol/blob/master/CONTRIBUTING.md) for information on development. 
 
 ### Activation
 
-`license_finder` will find and include packages for all supported
+`license_patrol` will find and include packages for all supported
 languages, as long as that language has a package definition in the project directory:
 
 * `Gemfile` (for `bundler`)
@@ -211,22 +213,22 @@ languages, as long as that language has a package definition in the project dire
 
 ### Continuous Integration
 
-`license_finder` will return a non-zero exit status if there are unapproved
+`license_patrol` will return a non-zero exit status if there are unapproved
 dependencies. This can be useful for inclusion in a CI environment to alert you
 if someone adds an unapproved dependency to the project.
 
 
 ## Approving Dependencies
 
-`license_finder` will inform you whenever you have an unapproved dependency.
+`license_patrol` will inform you whenever you have an unapproved dependency.
 If your business decides this is an acceptable risk, the easiest way to approve
-the dependency is by running `license_finder approvals add`.
+the dependency is by running `license_patrol approvals add`.
 
 For example, let's assume you've added the `awesome_gpl_gem`
-to your Gemfile, which `license_finder` reports is unapproved:
+to your Gemfile, which `license_patrol` reports is unapproved:
 
 ```sh
-$ license_finder
+$ license_patrol
 Dependencies that need approval:
 awesome_gpl_gem, 1.0.0, GPL
 ```
@@ -235,36 +237,36 @@ Your business tells you that in this case, it's acceptable to use this
 gem. You now run:
 
 ```sh
-$ license_finder approvals add awesome_gpl_gem
+$ license_patrol approvals add awesome_gpl_gem
 ```
 
-If you rerun `license_finder`, you should no longer see
+If you rerun `license_patrol`, you should no longer see
 `awesome_gpl_gem` in the output.
 
 To approve specific version
 
 ```sh
-$ license_finder approvals add awesome_gpl_gem --version=1.0.0
+$ license_patrol approvals add awesome_gpl_gem --version=1.0.0
 ```
 
 To record who approved the dependency and why:
 
 ```sh
-$ license_finder approvals add awesome_gpl_gem --who CTO --why "Go ahead"
+$ license_patrol approvals add awesome_gpl_gem --who CTO --why "Go ahead"
 ```
 
 ### Permitting Licenses
 
 Approving packages one-by-one can be tedious.  Usually your business has
-blanket policies about which packages are approved.  To tell `license_finder`
+blanket policies about which packages are approved.  To tell `license_patrol`
 that any package with the MIT license should be approved, run:
 
 ``` sh
-$ license_finder permitted_licenses add MIT
+$ license_patrol permitted_licenses add MIT
 ```
 
 Any current or future packages with the MIT license will be excluded from the
-output of `license_finder`.
+output of `license_patrol`.
 
 You can also record `--who` and `--why` when changing permitted licenses,
 or making any other decision about your project.
@@ -285,7 +287,7 @@ decisions.
 
 ### Output from `action_items`
 
-You could expect `license_finder`, which is an alias for `license_finder
+You could expect `license_patrol`, which is an alias for `license_patrol
 action_items` to output something like the following on a Rails project where
 MIT had been permitted:
 
@@ -306,24 +308,24 @@ You can customize the format of the output in the same way that you customize
 
 ### Output from `project_roots`
 
-The `license_finder project_roots` command will output the current working directory as a string in an array.
+The `license_patrol project_roots` command will output the current working directory as a string in an array.
 
 Using the `--recursive` option means the array will include subdirectories that contain a known package manager. With the exception that Gradle and Maven subprojects will not be included.
 
 
 ### Output from `report`
 
-The `license_finder report` command will output human-readable reports that you
+The `license_patrol report` command will output human-readable reports that you
 could send to your non-technical business partners, lawyers, etc.  You can
 choose the format of the report (text, csv, html or markdown); see
-`license_finder --help report` for details.  The output is sent to STDOUT, so
+`license_patrol --help report` for details.  The output is sent to STDOUT, so
 you can save the reports wherever you want them.  You can commit them to
 version control if you like.
 
-The HTML report generated by `license_finder report --format html` summarizes
+The HTML report generated by `license_patrol report --format html` summarizes
 all of your project's dependencies and includes information about which need to
 be approved. The project name at the top of the report can be set with
-`license_finder project_name add`.
+`license_patrol project_name add`.
 
 ### Note:
 When using the yarn package manager, when a node_module's package.json doesn't
@@ -331,7 +333,7 @@ explicitly declare a license, yarn indicates that it has inferred the license ba
 on some keywords in other files by appending an asterisk to the license name. If you
 see a * at the end of the license name, this is intended.
 
-See [CONTRIBUTING.md](https://github.com/pivotal/LicenseFinder/blob/master/CONTRIBUTING.md#adding-reports)
+See [CONTRIBUTING.md](https://github.com/powerhome/license_patrol/blob/master/CONTRIBUTING.md#adding-reports)
 for advice about adding and customizing reports.
 
 
@@ -339,12 +341,12 @@ for advice about adding and customizing reports.
 
 ### Setting Licenses
 
-When `license_finder` reports that a dependency's license is 'unknown',
+When `license_patrol` reports that a dependency's license is 'unknown',
 you should manually research what the actual license is.  When you
 have established the real license, you can record it with:
 
 ```sh
-$ license_finder licenses add my_unknown_dependency MIT
+$ license_patrol licenses add my_unknown_dependency MIT
 ```
 
 This command would assign the MIT license to all versions of the dependency
@@ -352,7 +354,7 @@ This command would assign the MIT license to all versions of the dependency
 to only a specific version of the dependency:
 
 ```sh
-$ license_finder licenses add my_unknown_dependency MIT --version=1.0.0
+$ license_patrol licenses add my_unknown_dependency MIT --version=1.0.0
 ```
 
 Please note that adding a license to a specific version of a dependency will 
@@ -365,51 +367,51 @@ added through the `licenses add` command:
 
 ```sh
 # Removes all licenses from any version of the dependency
-$ license_finder licenses remove my_unknown_dependency
+$ license_patrol licenses remove my_unknown_dependency
 
 # Removes just the MIT license from any version of the dependency
-$ license_finder licenses remove my_unknown_dependency MIT
+$ license_patrol licenses remove my_unknown_dependency MIT
 
 # Removes all licenses from only version 1.0.0 of the dependency
 # This has no effect if you had last added a license to all versions of the dependency
-$ license_finder licenses remove my_unknown_dependency --version=1.0.0
+$ license_patrol licenses remove my_unknown_dependency --version=1.0.0
 
 # Removes just the MIT license from only version 1.0.0 of the dependency
 # This has no effect if you had last added a license to all versions of the dependency
-$ license_finder licenses remove my_unknown_dependency MIT --version=1.0.0
+$ license_patrol licenses remove my_unknown_dependency MIT --version=1.0.0
 ```
 
 ### Adding Hidden Dependencies
 
-`license_finder` can track dependencies that your package managers
+`license_patrol` can track dependencies that your package managers
 don't know about (JS libraries that don't appear in your
 Gemfile/requirements.txt/package.json, etc.)
 
 ```sh
-$ license_finder dependencies add my_js_dep MIT 0.1.2
+$ license_patrol dependencies add my_js_dep MIT 0.1.2
 ```
 
-Run `license_finder dependencies help` for
+Run `license_patrol dependencies help` for
 additional documentation about managing these dependencies.
 
-`license_finder` cannot automatically detect when one of these
+`license_patrol` cannot automatically detect when one of these
 dependencies has been removed from your project, so you can use:
 
 ```sh
-$ license_finder dependencies remove my_js_dep
+$ license_patrol dependencies remove my_js_dep
 ```
 
 ### Excluding Dependencies
 
 Sometimes a project will have development or test dependencies which
 you don't want to track.  You can exclude theses dependencies by running
-`license_finder ignored_groups`.  (Currently this only works for packages
+`license_patrol ignored_groups`.  (Currently this only works for packages
 managed by Bundler, NPM, Yarn, Maven, Pip2, Pip3, and Nuget.)
 
 On rare occasions a package manager will report an individual dependency
 that you want to exclude from all reports, even though it is approved.
 You can exclude an individual dependency by running
-`license_finder ignored_dependencies`.  Think carefully before adding
+`license_patrol ignored_dependencies`.  Think carefully before adding
 dependencies to this list.  A likely item to exclude is `bundler`,
 since it is a common dependency whose version changes from machine to
 machine.  Adding it to the `ignored_dependencies` would prevent it
@@ -418,7 +420,7 @@ machine.  Adding it to the `ignored_dependencies` would prevent it
 ### Restricting Licenses
 
 Some projects will have a list of licenses that cannot be used.  You can
-restrict these licenses with `license_finder restricted_licenses add`.  Any dependency
+restrict these licenses with `license_patrol restricted_licenses add`.  Any dependency
 that has exclusively restricted licenses will always appear in the action
 items, even if someone attempts to manually approve or permit it.  However,
 if a dependency has even one license that is not restricted, it can still be
@@ -426,36 +428,36 @@ manually approved or permitted.
 
 ## Decision inheritance
 
-Add or remove decision files you want to inherit from - see `license_finder inherited_decisions help` for more information.
+Add or remove decision files you want to inherit from - see `license_patrol inherited_decisions help` for more information.
 
 This allows you to have a centralized decision file for approved/restricted licenses. If you have multiple projects it's way easier to have one single place where you approved or restricted licenses defined.
 
 Add one or more decision files to the inherited decisions
 ```bash
-license_finder inherited_decisions add DECISION_FILE
+license_patrol inherited_decisions add DECISION_FILE
 ```
 
 Remove one or more decision files from the inherited decisions
 ```bash
-license_finder inherited_decisions remove DECISION_FILE
+license_patrol inherited_decisions remove DECISION_FILE
 ```
 
 List all the inherited decision files
 ```bash
-license_finder inherited_decisions list
+license_patrol inherited_decisions list
 ```
 
 ## Configuration
 
-Be default, `license_finder` expects the decisions file to be stored at
+Be default, `license_patrol` expects the decisions file to be stored at
 `doc/dependency_decisions.yml`.  All commands can be passed `--decisions_file`
 to override this location.
 
 ### Package Manager Configuration
 
 If you have a gradle project, you can invoke gradle with a custom script by
-passing (for example) `--gradle_command gradlew` to `license_finder` or
-`license_finder report`.
+passing (for example) `--gradle_command gradlew` to `license_patrol` or
+`license_patrol report`.
 
 Similarly you can invoke a custom rebar script with `--rebar_command rebar`.
 If you store rebar dependencies in a custom directory (by setting `deps_dir` in
@@ -466,19 +468,19 @@ set `--mix_deps_dir` to fetch Mix dependencies from a custom directory.
 
 ### Narrow down Package Manager
 
-By default, license_finder will check for all supported package managers,
+By default, license_patrol will check for all supported package managers,
 but you can narrow it down to use only those you pass to `--enabled-package-managers`.
 For example,
 
 ```
-$ license_finder --enabled-package-managers bundler npm
+$ license_patrol --enabled-package-managers bundler npm
 ```
 
 ### Saving Configuration
 
 It may be difficult to remember to pass command line options to every command.
 In some of these cases you can store default values in a YAML formatted config
-file. `license_finder` looks for this file in `config/license_finder.yml`.
+file. `license_patrol` looks for this file in `config/license_patrol.yml`.
 
 As an example, the file might look like this:
 
@@ -499,11 +501,11 @@ enabled_package_managers:
 
 ### Gradle Projects
 
-`license_finder` supports both Gradle 1.x and Gradle 2.x. You need to have installed
+`license_patrol` supports both Gradle 1.x and Gradle 2.x. You need to have installed
 the license-gradle-plugin in your project:
 [https://github.com/hierynomus/license-gradle-plugin](https://github.com/hierynomus/license-gradle-plugin)
 
-By default, `license_finder` will report on Gradle's "runtime" dependencies. If
+By default, `license_patrol` will report on Gradle's "runtime" dependencies. If
 you want to generate a report for some other dependency configuration (e.g.
 Android projects will sometimes specify their meaningful dependencies in the
 "compile" group), you can specify it in your project's `build.gradle`:
@@ -518,7 +520,7 @@ downloadLicenses {
 
 ### Conan Projects
 
-`license_finder` supports Conan. You need to have the following lines in your conanfile.txt for `license_finder` to retrieve dependencies' licenses.
+`license_patrol` supports Conan. You need to have the following lines in your conanfile.txt for `license_patrol` to retrieve dependencies' licenses.
 Ensure that `conan install` does not generate an error.
 
 ```
@@ -528,10 +530,10 @@ Ensure that `conan install` does not generate an error.
 
 ### SBT Projects
 
-`license_finder` supports SBT. You need to have installed the sbt-license-report in your project:
+`license_patrol` supports SBT. You need to have installed the sbt-license-report in your project:
 [https://github.com/sbt/sbt-license-report](https://github.com/sbt/sbt-license-report)
 
-By default, `license_finder` will report on SBT's "compile" and "test" dependencies. If
+By default, `license_patrol` will report on SBT's "compile" and "test" dependencies. If
 you want to generate a report for some other dependency configuration, you can specify
 it in your projects's `build.sbt`
 
@@ -541,18 +543,12 @@ licenseConfigurations := Set("compile", "provided")
 
 ## Requirements
 
-`license_finder` requires ruby >= 2.6.0.
+`license_patrol` requires ruby >= 2.6.0.
 
 
 ## Upgrading
 
-To upgrade to `license_finder` version >= 6.0, you have to replace the terminology `whitelist` with `permit` and  `blacklist` with `restrict` in your `dependency_decisions.yml`. See [Changelog](https://github.com/pivotal/LicenseFinder/blob/master/CHANGELOG.md#600--2020-01-22) for more details.
-
-To upgrade from `license_finder` version 1.2 to 2.0, see
-[`license_finder_upgrade`](https://github.com/mainej/license_finder_upgrade).
-To upgrade to 2.0 from a version lower than 1.2, first upgrade to 1.2, and run
-`license_finder` at least once.  This will ensure that the `license_finder`
-database is in a state which `license_finder_upgrade` understands.
+To upgrade from a LicenseFinder version older than 6.0, you have to replace the terminology `whitelist` with `permit` and  `blacklist` with `restrict` in your `dependency_decisions.yml`. See [Changelog](https://github.com/pivotal/LicenseFinder/blob/master/CHANGELOG.md#600--2020-01-22) for more details.
 
 
 ## A Plea to Package Authors and Maintainers
@@ -578,8 +574,8 @@ And save a `LICENSE` file which contains your license text in your repo.
 
 * Yarn
    * A module that is incompatible with the platform on which
-     license_finder is run will always be reported to have a license type
-     of "unknown". ([#456](https://github.com/pivotal/LicenseFinder/issues/456))
+     license_patrol is run will always be reported to have a license type
+     of "unknown". ([#456](https://github.com/powerhome/license_patrol/issues/456))
 
 ## Support
 
@@ -589,9 +585,9 @@ And save a `LICENSE` file which contains your license text in your repo.
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/pivotal/LicenseFinder/blob/master/CONTRIBUTING.md).
+See [CONTRIBUTING.md](https://github.com/powerhome/license_patrol/blob/master/CONTRIBUTING.md).
 
 
 ## License
 
-LicenseFinder is released under the MIT License. http://www.opensource.org/licenses/mit-license
+LicensePatrol is released under the MIT License. http://www.opensource.org/licenses/mit-license

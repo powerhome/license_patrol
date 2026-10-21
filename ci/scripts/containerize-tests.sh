@@ -6,7 +6,7 @@ apk update && apk add git
 source /opt/resource/common.sh
 start_docker 3 3
 
-pushd LicenseFinder
+pushd LicensePatrol
   docker build . -t licensefinder/license_finder
 
   docker run -v $PWD:/lf -it licensefinder/license_finder /bin/bash \

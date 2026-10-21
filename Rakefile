@@ -3,7 +3,7 @@
 require 'bundler'
 Bundler::GemHelper.install_tasks
 
-require './lib/license_finder/platform'
+require './lib/license_patrol/platform'
 require 'rspec/core/rake_task'
 
 desc 'Run all specs in spec/'
@@ -19,7 +19,7 @@ namespace :features do
     t.fail_on_error = true
     t.pattern = './features/**/*_spec.rb'
     opts = %w[--color --format d --tag focus]
-    opts += LicenseFinder::Platform.darwin? ? [] : %w[--tag ~ios]
+    opts += LicensePatrol::Platform.darwin? ? [] : %w[--tag ~ios]
     t.rspec_opts = opts
   end
 end
@@ -29,16 +29,16 @@ RSpec::Core::RakeTask.new(:features) do |t|
   t.fail_on_error = true
   t.pattern = './features/**/*_spec.rb'
   opts = %w[--color --format d]
-  opts += LicenseFinder::Platform.darwin? ? [] : %w[--tag ~ios]
+  opts += LicensePatrol::Platform.darwin? ? [] : %w[--tag ~ios]
   t.rspec_opts = opts
 end
 
 desc 'Check for non-Ruby development dependencies.'
 task :check_dependencies do
-  require './lib/license_finder'
+  require './lib/license_patrol'
   satisfied = true
-  LicenseFinder::Scanner::PACKAGE_MANAGERS.each do |package_manager|
-    satisfied = false unless package_manager.new(project_path: Pathname.new('')).installed?(LicenseFinder::Logger.new(LicenseFinder::Logger::MODE_INFO))
+  LicensePatrol::Scanner::PACKAGE_MANAGERS.each do |package_manager|
+    satisfied = false unless package_manager.new(project_path: Pathname.new('')).installed?(LicensePatrol::Logger.new(LicensePatrol::Logger::MODE_INFO))
   end
   $stdout.flush
   exit 1 unless satisfied
@@ -63,10 +63,10 @@ task :update_pipeline, [:slack_url, :slack_channel] do |_, args|
 
   vars = params.join(' ')
 
-  cmd = "bash -c \"fly -t osl set-pipeline -n -p LicenseFinder --config <(erb #{vars} ci/pipelines/release.yml.erb)\""
+  cmd = "bash -c \"fly -t osl set-pipeline -n -p LicensePatrol --config <(erb #{vars} ci/pipelines/release.yml.erb)\""
   system(cmd)
 
-  cmd = "bash -c \"fly -t osl set-pipeline -n -p LicenseFinder-pr --config <(erb #{vars} ci/pipelines/pull-request.yml.erb)\""
+  cmd = "bash -c \"fly -t osl set-pipeline -n -p LicensePatrol-pr --config <(erb #{vars} ci/pipelines/pull-request.yml.erb)\""
   system(cmd)
 end
 

@@ -16,7 +16,7 @@ resources:
 - name: lf-git
   type: git
   source:
-    uri: git@github.com:pivotal/LicenseFinder.git
+    uri: git@github.com:powerhome/license_patrol.git
     private_key: ((github-cf-osl-bot-private-key))
     branch: master
     ignore_paths: [VERSION, CHANGELOG.md]
@@ -51,7 +51,7 @@ resources:
   check_every: 24h
   source:
     owner: pivotal
-    repository: LicenseFinder
+    repository: LicensePatrol
     access_token: ((github-api-root-token))
 
 <% if setup_slack %>
@@ -78,14 +78,14 @@ jobs:
   - get: dockerhub-edge
     passed: [build-docker-image]
     trigger: true
-  - get: LicenseFinder
+  - get: LicensePatrol
     resource: lf-git
     passed: [build-docker-image]
     version: every
   - task: ruby-<%= ruby_version %>
     privileged: true
     image: dockerhub-edge
-    file: LicenseFinder/ci/tasks/run-tests.yml
+    file: LicensePatrol/ci/tasks/run-tests.yml
     params:
       RUBY_VERSION_UNDER_TEST: <%= ruby_version %>
 
@@ -95,7 +95,7 @@ jobs:
     params:
       channel: '<%= slack_channel %>'
       icon_emoji: ':crying_cat_face:'
-      text: '<%= "License Finder build failed. Build: https://norsk.cf-app.com/teams/main/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" %>'
+      text: '<%= "License Patrol build failed. Build: https://norsk.cf-app.com/teams/main/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" %>'
 <% end %>
 <% end %>
 
@@ -105,14 +105,14 @@ jobs:
   - get: dockerhub-edge
     passed: [build-docker-image]
     trigger: true
-  - get: LicenseFinder
+  - get: LicensePatrol
     resource: lf-git
     version: every
     passed: [build-docker-image]
   - task: run-rubocop
     privileged: true
-    file: LicenseFinder/ci/tasks/rubocop.yml
-    input_mapping: { LicenseFinder: LicenseFinder }
+    file: LicensePatrol/ci/tasks/rubocop.yml
+    input_mapping: { LicensePatrol: LicensePatrol }
 
 - name: bump-major
   plan:

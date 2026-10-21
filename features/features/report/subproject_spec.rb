@@ -7,7 +7,7 @@ describe 'Aggregate Paths Projects report' do
   # I want a single csv report that includes multiple sub-projects
   # So that I can easily review my composite application's dependencies and licenses
 
-  let(:developer) { LicenseFinder::TestingDSL::User.new }
+  let(:developer) { LicensePatrol::TestingDSL::User.new }
 
   specify 'shows specified columns' do
     foo10 = developer.create_gem_in_path('foo', 'v-10', version: '1.0.0', license: 'MIT', homepage: 'http://example.homepage.com')
@@ -16,7 +16,7 @@ describe 'Aggregate Paths Projects report' do
     project1.depend_on(foo10)
 
     developer.create_empty_project
-    developer.execute_command("license_finder report --columns name homepage aggregate_paths --aggregate_paths #{project1.project_dir} --format=csv")
+    developer.execute_command("license_patrol report --columns name homepage aggregate_paths --aggregate_paths #{project1.project_dir} --format=csv")
     expect(developer).to be_seeing_once("foo,http://example.homepage.com,#{project1.project_dir}")
   end
 
@@ -28,7 +28,7 @@ describe 'Aggregate Paths Projects report' do
     project2.depend_on(developer.create_gem('bar', version: '2.0.0', license: 'GPLv2'))
 
     developer.create_empty_project
-    developer.execute_command("license_finder report --columns name version licenses aggregate_paths --aggregate_paths #{project1.project_dir} #{project2.project_dir} --format=csv")
+    developer.execute_command("license_patrol report --columns name version licenses aggregate_paths --aggregate_paths #{project1.project_dir} #{project2.project_dir} --format=csv")
     expect(developer).to be_seeing("foo,1.0.0,MIT,#{project1.project_dir}")
     expect(developer).to be_seeing("bar,2.0.0,GPLv2,#{project2.project_dir}")
   end
@@ -43,7 +43,7 @@ describe 'Aggregate Paths Projects report' do
     project2.depend_on(foo)
 
     developer.create_empty_project
-    developer.execute_command("license_finder report --columns name version licenses aggregate_paths --aggregate_paths #{project1.project_dir} #{project2.project_dir} --format=csv")
+    developer.execute_command("license_patrol report --columns name version licenses aggregate_paths --aggregate_paths #{project1.project_dir} #{project2.project_dir} --format=csv")
     expect(developer).to be_seeing_once("foo,1.0.0,MIT,\"#{project1.project_dir},#{project2.project_dir}\"")
   end
 
@@ -58,7 +58,7 @@ describe 'Aggregate Paths Projects report' do
     project2.depend_on(foo11)
 
     developer.create_empty_project
-    developer.execute_command("license_finder report --columns name version licenses aggregate_paths --aggregate_paths #{project1.project_dir} #{project2.project_dir} --format=csv")
+    developer.execute_command("license_patrol report --columns name version licenses aggregate_paths --aggregate_paths #{project1.project_dir} #{project2.project_dir} --format=csv")
     expect(developer).to be_seeing_once("foo,1.0.0,MIT,#{project1.project_dir}")
     expect(developer).to be_seeing_once("foo,1.1.0,MIT,#{project2.project_dir}")
   end

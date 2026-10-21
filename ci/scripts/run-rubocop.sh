@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-cd LicenseFinder
+cd LicensePatrol
 
 gem update --system
 bundle install --without runtime default
