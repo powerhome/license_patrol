@@ -1,3 +1,11 @@
+# [1.2.0] / 2026-10-28
+
+### Fixed
+* Yarn 2, 3 and 4 projects scan without the third-party licenses plugin, reading packages from the built-in `yarn info` - [6a46a083](https://github.com/powerhome/license_patrol/commit/6a46a083) - Carlos Palhares
+
+### Changed
+* Yarn 2+ no longer reports workspaces as packages, and `--prepare` only runs `yarn install` - [6a46a083](https://github.com/powerhome/license_patrol/commit/6a46a083) - Carlos Palhares
+
 # [1.1.0] / 2026-10-21
 
 ### Added

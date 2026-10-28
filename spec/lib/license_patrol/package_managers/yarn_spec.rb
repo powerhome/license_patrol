@@ -23,32 +23,38 @@ module LicensePatrol
     end
 
     let(:yarn_shell_command_output) do
-      {
-        'value' => 'MIT',
-        'children' => {
-          '@babel/preset-typescript@virtual:47c2c5b90818fd89a72#npm:7.18.6' => {
-            'value' => {
-              'locator' => '@babel/preset-typescript@virtual:47c2c5b90818fd89a72#npm:7.18.6',
-              'descriptor' => '@babel/preset-typescript@virtual:47c2c5b90818fd89a72#npm:^7.13.0'
-            },
-            'children' => {
-              'url' => 'https://github.com/babel/babel.git',
-              'vendorName' => 'The Babel Team',
-              'vendorUrl' => 'https://babel.dev/docs/en/next/babel-preset-typescript'
-            }
-          },
-          '@types/jest@npm:26.0.24' => {
-            'value' => {
-              'locator' => '@types/jest@npm:26.0.24',
-              'descriptor' => '@types/jest@npm:^26.0.23'
-            },
-            'children' => {
-              'url' => 'https://github.com/DefinitelyTyped/DefinitelyTyped.git',
-              'vendorUrl' => 'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/jest'
-            }
-          }
-        }
-      }.to_json
+      [
+        { 'value' => 'root-app@workspace:.',
+          'children' => { 'Version' => '0.0.0', 'Manifest' => { 'License' => 'MIT', 'Homepage' => nil },
+                          'Dependencies' => [
+                            { 'descriptor' => '@acme/sub@workspace:*', 'locator' => '@acme/sub@workspace:packages/sub' },
+                            { 'descriptor' => 'left-pad@npm:1.3.0', 'locator' => 'left-pad@npm:1.3.0' },
+                            { 'descriptor' => 'react-dom@virtual:c6e817ae#npm:18.2.0', 'locator' => 'react-dom@virtual:c6e817ae#npm:18.2.0' },
+                            { 'descriptor' => 'typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>',
+                              'locator' => 'typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c' }
+                          ] } },
+        { 'value' => '@acme/sub@workspace:packages/sub',
+          'children' => { 'Version' => '1.0.0', 'Manifest' => { 'License' => nil, 'Homepage' => nil },
+                          'Dependencies' => [
+                            { 'descriptor' => '@types/jest@npm:^26.0.23', 'locator' => '@types/jest@npm:26.0.24' },
+                            { 'descriptor' => 'is-number@npm:7.0.0', 'locator' => 'is-number@npm:7.0.0' }
+                          ] } },
+        { 'value' => '@types/jest@npm:26.0.24',
+          'children' => { 'Version' => '26.0.24', 'Manifest' => { 'License' => 'MIT', 'Homepage' => 'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/jest' } } },
+        { 'value' => 'is-number@npm:7.0.0',
+          'children' => { 'Version' => '7.0.0', 'Manifest' => { 'License' => 'MIT', 'Homepage' => 'https://github.com/jonschlinkert/is-number' } } },
+        { 'value' => 'left-pad@npm:1.3.0',
+          'children' => { 'Version' => '1.3.0', 'Manifest' => { 'License' => 'WTFPL', 'Homepage' => nil } } },
+        { 'value' => 'react-dom@npm:18.2.0',
+          'children' => { 'Instances' => 1, 'Version' => '18.2.0', 'Manifest' => { 'License' => 'MIT', 'Homepage' => 'https://reactjs.org/' },
+                          'Dependencies' => [{ 'descriptor' => 'scheduler@npm:^0.23.0', 'locator' => 'scheduler@npm:0.23.2' }] } },
+        { 'value' => 'scheduler@npm:0.23.2',
+          'children' => { 'Version' => '0.23.2', 'Manifest' => { 'License' => nil, 'Homepage' => nil } } },
+        { 'value' => 'typescript@npm:5.4.5',
+          'children' => { 'Version' => '5.4.5', 'Manifest' => { 'License' => 'Apache-2.0', 'Homepage' => 'https://www.typescriptlang.org/' } } },
+        { 'value' => 'typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c',
+          'children' => { 'Version' => '5.4.5', 'Manifest' => { 'License' => 'Apache-2.0', 'Homepage' => 'https://www.typescriptlang.org/' } } }
+      ].map(&:to_json).join("\n")
     end
 
     describe '.prepare' do
@@ -81,46 +87,26 @@ module LicensePatrol
         end
       end
 
-      context 'when using Yarn 3.x+ projects' do
-        before do
-          allow(SharedHelpers::Cmd).to receive(:run).with('yarn -v').and_return(['3.0.1', '', cmd_success])
-        end
+      %w[2.0.1 3.0.1 4.9.1].each do |version|
+        context "when using Yarn #{version} projects" do
+          before do
+            allow(SharedHelpers::Cmd).to receive(:run).with('yarn -v').and_return([version, '', cmd_success])
+          end
 
-        it 'should call yarn install with no cli parameters' do
-          expect(SharedHelpers::Cmd).to receive(:run).with('yarn install && yarn plugin import https://raw.githubusercontent.com/mhassan1/yarn-plugin-licenses/v0.7.2/bundles/@yarnpkg/plugin-licenses.js')
-                                                     .and_return([yarn1_shell_command_output, '', cmd_success])
-          subject.prepare
-        end
-
-        context 'ignored_groups contains devDependencies' do
-          subject { Yarn.new(project_path: Pathname(root), ignored_groups: 'devDependencies') }
-
-          it 'should include a production flag' do
-            expect(SharedHelpers::Cmd).to receive(:run).with('yarn plugin import workspace-tools && yarn workspaces focus --all --production && yarn install && yarn plugin import https://raw.githubusercontent.com/mhassan1/yarn-plugin-licenses/v0.7.2/bundles/@yarnpkg/plugin-licenses.js')
-                                                       .and_return([yarn1_shell_command_output, '', cmd_success])
+          it 'should call yarn install with no cli parameters' do
+            expect(SharedHelpers::Cmd).to receive(:run).with('yarn install')
+                                                       .and_return(['', '', cmd_success])
             subject.prepare
           end
-        end
-      end
 
-      context 'when using Yarn 2.x projects' do
-        before do
-          allow(SharedHelpers::Cmd).to receive(:run).with('yarn -v').and_return(['2.0.1', '', cmd_success])
-        end
+          context 'ignored_groups contains devDependencies' do
+            subject { Yarn.new(project_path: Pathname(root), ignored_groups: 'devDependencies') }
 
-        it 'should call yarn install with no cli parameters' do
-          expect(SharedHelpers::Cmd).to receive(:run).with('yarn install && yarn plugin import https://raw.githubusercontent.com/mhassan1/yarn-plugin-licenses/v0.6.0/bundles/@yarnpkg/plugin-licenses.js')
-                                            .and_return([yarn1_shell_command_output, '', cmd_success])
-          subject.prepare
-        end
-
-        context 'ignored_groups contains devDependencies' do
-          subject { Yarn.new(project_path: Pathname(root), ignored_groups: 'devDependencies') }
-
-          it 'should include a production flag' do
-            expect(SharedHelpers::Cmd).to receive(:run).with('yarn plugin import workspace-tools && yarn workspaces focus --all --production && yarn install && yarn plugin import https://raw.githubusercontent.com/mhassan1/yarn-plugin-licenses/v0.6.0/bundles/@yarnpkg/plugin-licenses.js')
-                                              .and_return([yarn1_shell_command_output, '', cmd_success])
-            subject.prepare
+            it 'still installs every dependency' do
+              expect(SharedHelpers::Cmd).to receive(:run).with('yarn install')
+                                                         .and_return(['', '', cmd_success])
+              subject.prepare
+            end
           end
         end
       end
@@ -136,48 +122,64 @@ module LicensePatrol
         allow(SharedHelpers::Cmd).to receive(:run).with('yarn -v').and_return(['1.0.1', '', cmd_success])
       end
 
-      context 'when using Yarn v2.x+' do
-        before do
-          allow(SharedHelpers::Cmd).to receive(:run).with('yarn -v').and_return(['2.0.1', '', cmd_success])
-        end
-
-        it 'should call licenses plugin and displays packages' do
-          allow(SharedHelpers::Cmd).to receive(:run).with('yarn config get modules-folder') do
-            ["yarn_modules\n", '', cmd_success]
+      %w[2.0.1 3.0.1 4.9.1].each do |version|
+        context "when using Yarn #{version}" do
+          before do
+            allow(SharedHelpers::Cmd).to receive(:run).with('yarn -v').and_return([version, '', cmd_success])
+            allow(SharedHelpers::Cmd).to receive(:run).with('yarn config get modules-folder') do
+              ['', 'Usage Error: Couldn\'t find a configuration settings named "modules-folder"', cmd_failure]
+            end
+            allow(SharedHelpers::Cmd).to receive(:run).with(Yarn::BERRY_SHELL_COMMAND) do
+              [yarn_shell_command_output, '', cmd_success]
+            end
           end
-          allow(SharedHelpers::Cmd).to receive(:run).with(Yarn::SHELL_COMMAND) do
-            [yarn_shell_command_output, '', cmd_success]
-          end
 
-          expect(subject.current_packages.length).to eq 2
-          expect(subject.current_packages.first.name).to eq '@babel/preset-typescript'
-          expect(subject.current_packages.first.version).to eq '7.18.6'
-          expect(subject.current_packages.first.license_names_from_spec).to eq ['MIT']
-          expect(subject.current_packages.first.homepage).to eq 'https://babel.dev/docs/en/next/babel-preset-typescript'
-          expect(subject.current_packages.first.authors).to eq 'The Babel Team'
-          expect(subject.current_packages.first.install_path).to eq Pathname(root).join('yarn_modules', '@babel/preset-typescript')
+          it 'lists every package but the workspaces' do
+            packages = subject.current_packages
 
-          expect(subject.current_packages.last.name).to eq '@types/jest'
-          expect(subject.current_packages.last.version).to eq '26.0.24'
-          expect(subject.current_packages.last.license_names_from_spec).to eq ['MIT']
-          expect(subject.current_packages.last.homepage).to eq 'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/jest'
-          expect(subject.current_packages.last.authors).to eq ''
-          expect(subject.current_packages.last.install_path).to eq Pathname(root).join('yarn_modules', '@types/jest')
-        end
-
-        it 'displays incompatible packages with correct license type' do
-          allow(SharedHelpers::Cmd).to receive(:run).with(Yarn::SHELL_COMMAND) do
-            [
-              '{"value":"Internal","children":{"@company/package@workspace:.":{"value":{"locator":"@company/package@workspace:.","descriptor":"@company/package@workspace:."},"children":{}}}}',
-              '',
-              cmd_success
+            expect(packages.map { |package| [package.name, package.version] }).to eq [
+              ['@types/jest', '26.0.24'],
+              ['is-number', '7.0.0'],
+              ['left-pad', '1.3.0'],
+              ['react-dom', '18.2.0'],
+              ['scheduler', '0.23.2'],
+              ['typescript', '5.4.5']
             ]
+            expect(packages.first.license_names_from_spec).to eq ['MIT']
+            expect(packages.first.homepage).to eq 'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/jest'
+            expect(packages.first.install_path).to eq Pathname(root).join('node_modules', '@types/jest')
+            expect(packages.last.license_names_from_spec).to eq ['Apache-2.0']
           end
 
-          expect(subject.current_packages.length).to eq 1
-          expect(subject.current_packages.last.name).to eq '@company/package'
-          expect(subject.current_packages.last.version).to eq '.'
-          expect(subject.current_packages.last.license_names_from_spec).to eq ['Internal']
+          it 'leaves the license to be found in the package files when the manifest has none' do
+            scheduler = subject.current_packages.find { |package| package.name == 'scheduler' }
+
+            expect(scheduler.license_names_from_spec).to eq []
+            expect(scheduler.homepage).to eq ''
+          end
+
+          context 'ignored_groups contains devDependencies' do
+            subject { Yarn.new(project_path: Pathname(root), ignored_groups: 'devDependencies') }
+
+            before do
+              FileUtils.mkdir_p(File.join(root, 'packages/sub'))
+              File.write(File.join(root, 'package.json'), { devDependencies: { 'left-pad' => '1.3.0' } }.to_json)
+              File.write(File.join(root, 'packages/sub/package.json'),
+                         { dependencies: { 'is-number' => '7.0.0' }, devDependencies: { '@types/jest' => '^26.0.23' } }.to_json)
+            end
+
+            it 'lists only the packages the workspaces depend on in production' do
+              expect(subject.current_packages.map(&:name)).to match_array %w[is-number react-dom scheduler typescript]
+            end
+          end
+
+          context 'when the shell command fails' do
+            it 'an error is raised' do
+              allow(SharedHelpers::Cmd).to receive(:run).with(Yarn::BERRY_SHELL_COMMAND).and_return([nil, 'error', cmd_failure])
+
+              expect { subject.current_packages }.to raise_error(/Command '#{Yarn::BERRY_SHELL_COMMAND}' failed to execute: error/)
+            end
+          end
         end
       end
 
@@ -310,25 +312,16 @@ module LicensePatrol
         end
       end
 
-      context 'when in a Yarn 2.x project' do
-        before do
-          allow(SharedHelpers::Cmd).to receive(:run).with('yarn -v').and_return(['2.1.9', '', cmd_success])
-        end
+      %w[2.1.9 3.5.9 4.9.1].each do |version|
+        context "when in a Yarn #{version} project" do
+          before do
+            allow(SharedHelpers::Cmd).to receive(:run).with('yarn -v').and_return([version, '', cmd_success])
+          end
 
-        subject { Yarn.new(project_path: Pathname(root), logger: double(:logger, active: nil)) }
-        it 'returns the correct prepare method' do
-          expect(subject.prepare_command).to eq('yarn install && yarn plugin import https://raw.githubusercontent.com/mhassan1/yarn-plugin-licenses/v0.6.0/bundles/@yarnpkg/plugin-licenses.js')
-        end
-      end
-
-      context 'when in a Yarn 3.x+ project' do
-        before do
-          allow(SharedHelpers::Cmd).to receive(:run).with('yarn -v').and_return(['3.5.9', '', cmd_success])
-        end
-
-        subject { Yarn.new(project_path: Pathname(root), logger: double(:logger, active: nil)) }
-        it 'returns the correct prepare method' do
-          expect(subject.prepare_command).to eq('yarn install && yarn plugin import https://raw.githubusercontent.com/mhassan1/yarn-plugin-licenses/v0.7.2/bundles/@yarnpkg/plugin-licenses.js')
+          subject { Yarn.new(project_path: Pathname(root), logger: double(:logger, active: nil)) }
+          it 'returns the correct prepare method' do
+            expect(subject.prepare_command).to eq('yarn install')
+          end
         end
       end
     end

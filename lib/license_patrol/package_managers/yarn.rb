@@ -8,30 +8,17 @@ module LicensePatrol
     end
 
     SHELL_COMMAND = 'yarn licenses list --recursive --json'
+    BERRY_SHELL_COMMAND = 'yarn info --all --recursive --json --extra manifest'
 
     def possible_package_paths
       [project_path.join('yarn.lock')]
     end
 
     def current_packages
-      # the licenses plugin supports the classic production flag
-      cmd = "#{Yarn::SHELL_COMMAND}#{classic_yarn_production_flag}"
       if yarn_version == 1
-        cmd += ' --no-progress'
-        cmd += " --cwd #{project_path}" unless project_path.nil?
-        cmd += " #{@yarn_options}" unless @yarn_options.nil?
-      end
-
-      stdout, stderr, status = Dir.chdir(project_path) { Cmd.run(cmd) }
-      raise "Command '#{cmd}' failed to execute: #{stderr}" unless status.success?
-
-      json_strings = stdout.encode('ASCII', invalid: :replace, undef: :replace, replace: '?').split("\n")
-      json_objects = json_strings.map { |json_object| JSON.parse(json_object) }
-
-      if yarn_version == 1
-        get_yarn1_packages(json_objects)
+        get_yarn1_packages(run_json_command(classic_shell_command))
       else
-        get_yarn_packages(json_objects)
+        get_yarn_packages(run_json_command(BERRY_SHELL_COMMAND))
       end
     end
 
@@ -62,20 +49,28 @@ module LicensePatrol
 
     private
 
+    # devDependencies are left out when reading the packages, so all of them are installed
     def yarn_prepare_command
-      "#{yarn_plugin_production_command}yarn install && yarn plugin import https://raw.githubusercontent.com/mhassan1/yarn-plugin-licenses/#{yarn_licenses_plugin_version}/bundles/@yarnpkg/plugin-licenses.js"
+      'yarn install'
     end
 
     def classic_yarn_prepare_command
       "yarn install --ignore-engines --ignore-scripts#{classic_yarn_production_flag}"
     end
 
-    def yarn_licenses_plugin_version
-      if yarn_version == 2
-        'v0.6.0'
-      else
-        'v0.7.2'
-      end
+    def classic_shell_command
+      cmd = "#{Yarn::SHELL_COMMAND}#{classic_yarn_production_flag} --no-progress"
+      cmd += " --cwd #{project_path}" unless project_path.nil?
+      cmd += " #{@yarn_options}" unless @yarn_options.nil?
+      cmd
+    end
+
+    def run_json_command(cmd)
+      stdout, stderr, status = Dir.chdir(project_path) { Cmd.run(cmd) }
+      raise "Command '#{cmd}' failed to execute: #{stderr}" unless status.success?
+
+      json_strings = stdout.encode('ASCII', invalid: :replace, undef: :replace, replace: '?').split("\n")
+      json_strings.map { |json_object| JSON.parse(json_object) }
     end
 
     def yarn_version
@@ -88,40 +83,64 @@ module LicensePatrol
       end
     end
 
+    # Yarn 2+ prints one line per package in the lockfile, keyed by its locator
+    # (e.g. "@babel/core@npm:7.18.6"). Workspaces are the project's own code,
+    # so only the packages they depend on are reported.
     def get_yarn_packages(json_objects)
-      packages = []
-      incompatible_packages = []
-      json_objects.each do |json_object|
-        license = json_object['value']
-        body = json_object['children']
+      infos = json_objects.map { |json_object| [json_object['value'], json_object['children']] }.to_h
+      locators = ignore_dev_dependencies? ? production_locators(infos) : infos.keys
 
-        body.each do |package_name, vendor_info|
-          valid_match = %r{(?<name>@?[\w/.-]+)@(?<manager>\D*):\D*(?<version>(\d+\.?)+)} =~ package_name.to_s
-          valid_match = %r{(?<name>@?[\w/.-]+)@virtual:.+#(\D*):\D*(?<version>(\d+\.?)+)} =~ package_name.to_s if manager.eql?('virtual')
-
-          if valid_match
-            homepage = vendor_info['children']['vendorUrl']
-            author = vendor_info['children']['vendorName']
-            package = YarnPackage.new(
-              name,
-              version,
-              spec_licenses: [license],
-              homepage: homepage,
-              authors: author,
-              install_path: project_path.join(modules_folder, name)
-            )
-            packages << package
-          end
-
-          incompatible_match = %r{(?<name>@?[\w/.-]+)@[a-z]*:(?<version>(\.))} =~ package_name.to_s
-          if incompatible_match
-            package = YarnPackage.new(name, version, spec_licenses: [license])
-            incompatible_packages.push(package)
-          end
-        end
+      packages = locators.reject { |locator| workspace_locator?(locator) }.map do |locator|
+        name = locator_name(locator)
+        info = infos[locator]
+        manifest = info['Manifest'] || {}
+        YarnPackage.new(
+          name,
+          info['Version'],
+          spec_licenses: [manifest['License']].compact,
+          homepage: manifest['Homepage'],
+          install_path: project_path.join(modules_folder, name)
+        )
       end
 
-      packages + incompatible_packages.uniq
+      # a patched package (e.g. typescript) is listed next to the package it patches
+      packages.uniq { |package| [package.name, package.version] }
+    end
+
+    # Walks the dependencies of every workspace, skipping the ones they declare
+    # in devDependencies, like "yarn workspaces focus --all --production".
+    def production_locators(infos)
+      seen = Set.new
+      pending = infos.keys.select { |locator| workspace_locator?(locator) }
+      until pending.empty?
+        locator = devirtualize(pending.shift)
+        next unless infos.key?(locator) && seen.add?(locator)
+
+        dev_dependencies = workspace_locator?(locator) ? workspace_dev_dependencies(locator) : []
+        (infos[locator]['Dependencies'] || []).each do |dependency|
+          pending << dependency['locator'] unless dev_dependencies.include?(locator_name(dependency['descriptor']))
+        end
+      end
+      seen.to_a
+    end
+
+    def workspace_dev_dependencies(locator)
+      workspace_path = locator.delete_prefix("#{locator_name(locator)}@workspace:")
+      manifest = JSON.parse(File.read(project_path.join(workspace_path, 'package.json')))
+      (manifest['devDependencies'] || {}).keys - (manifest['dependencies'] || {}).keys
+    end
+
+    def locator_name(locator)
+      locator[%r{\A(@[^/@]+/)?[^@]+}]
+    end
+
+    def workspace_locator?(locator)
+      locator.start_with?("#{locator_name(locator)}@workspace:")
+    end
+
+    # "react-dom@virtual:c6e8...#npm:18.2.0" is "react-dom@npm:18.2.0" with its peer dependencies resolved
+    def devirtualize(locator)
+      locator.sub(/@virtual:[^#]*#/, '@')
     end
 
     def get_yarn1_packages(json_objects)
@@ -181,15 +200,11 @@ module LicensePatrol
     end
 
     def classic_yarn_production_flag
-      return '' if @ignored_groups.nil?
-
-      @ignored_groups.include?('devDependencies') ? ' --production' : ''
+      ignore_dev_dependencies? ? ' --production' : ''
     end
 
-    def yarn_plugin_production_command
-      return '' if @ignored_groups.nil?
-
-      @ignored_groups.include?('devDependencies') ? 'yarn plugin import workspace-tools && yarn workspaces focus --all --production && ' : ''
+    def ignore_dev_dependencies?
+      !@ignored_groups.nil? && @ignored_groups.include?('devDependencies')
     end
   end
 end

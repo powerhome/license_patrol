@@ -48,7 +48,7 @@ and give you an actionable exception report.
 * Objective-C, Swift (via Carthage, CocoaPods \[0.39 and below. See [CocoaPods Specs Repo Sharding](http://blog.cocoapods.org/Sharding/)\]) and Swift Package Manager(SPM)
 * Elixir (via `mix`)
 * Golang (via `gvt`, `glide`,`dep`, `trash` and `govendor`)
-* JavaScript (via `yarn`)
+* JavaScript (via `yarn` 1.x through 4.x)
 * C++/C (via `conan`)
 * Scala (via `sbt`)
 * Rust (via `cargo`)
@@ -328,7 +328,7 @@ be approved. The project name at the top of the report can be set with
 `license_patrol project_name add`.
 
 ### Note:
-When using the yarn package manager, when a node_module's package.json doesn't
+When using Yarn 1, when a node_module's package.json doesn't
 explicitly declare a license, yarn indicates that it has inferred the license based
 on some keywords in other files by appending an asterisk to the license name. If you
 see a * at the end of the license name, this is intended.
