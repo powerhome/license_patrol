@@ -51,6 +51,10 @@ bundle exec rake build release:rubygem_push
   and tags made with the workflow's own `GITHUB_TOKEN` don't start other
   workflows: the release pull request's required checks would never run, and
   the tag would never publish the gem. The app needs read and write access to
-  contents, issues and pull requests on this repository.
+  contents and pull requests on this repository. Its `RELEASE_APP_CLIENT_ID`
+  variable and `RELEASE_APP_PRIVATE_KEY` secret live in the `release`
+  environment, which only `master` can deploy to, so no run from another
+  branch or a tag can read the key. Never add them as repository secrets or
+  variables.
 - The `license_patrol` workflow publishes the gem with the `RUBYGEMS_API_KEY`
   secret.
