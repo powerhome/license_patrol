@@ -3,21 +3,21 @@
 module LicensePatrol
   class License
     module Text
-      SPACES = /\s+/.freeze
-      QUOTES = /['`"]{1,2}/.freeze
-      YEAR_PLACEHOLDERS = /<year>/.freeze
-      PLACEHOLDERS = /<[^<>]+>/.freeze
-      SPECIAL_SINGLE_QUOTES = /[‘’]/.freeze
-      SPECIAL_DOUBLE_QUOTES = /[“”„«»]/.freeze
-      ALPHABET_ORDERED_LIST = /\\\([a-z]\\\)\\\s/.freeze
+      SPACES = /\s+/
+      QUOTES = /['`"]{1,2}/
+      YEAR_PLACEHOLDERS = /<year>/
+      PLACEHOLDERS = /<[^<>]+>/
+      SPECIAL_SINGLE_QUOTES = /[‘’]/
+      SPECIAL_DOUBLE_QUOTES = /[“”„«»]/
+      ALPHABET_ORDERED_LIST = /\\\([a-z]\\\)\\\s/
       ALPHABET_ORDERED_LIST_OPTIONAL = '(\([a-z]\)\s)?'
-      LIST_BULLETS = /(\d{1,2}\\\.|\\\*|\\-)\\\s/.freeze
+      LIST_BULLETS = /(\d{1,2}\\\.|\\\*|\\-)\\\s/
       LIST_BULLETS_OPTIONAL = '(\d{1,2}.|\*|\-)?\s*'
-      NEWLINE_CHARACTER = /\n+/.freeze
-      QUOTE_COMMENT_CHARACTER = /^\s*>+/.freeze
-      ESCAPED_QUOTES = /\\"/.freeze
-      SPECIAL_CHARACTERS = /§/.freeze
-      SPECIAL_DASHES = /–/.freeze
+      NEWLINE_CHARACTER = /\n+/
+      QUOTE_COMMENT_CHARACTER = /^\s*>+/
+      ESCAPED_QUOTES = /\\"/
+      SPECIAL_CHARACTERS = /§/
+      SPECIAL_DASHES = /–/
 
       def self.normalize_punctuation(text)
         text.dup.force_encoding('UTF-8')

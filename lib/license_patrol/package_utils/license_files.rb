@@ -5,7 +5,7 @@ require 'license_patrol/package_utils/possible_license_file'
 module LicensePatrol
   class LicenseFiles
     CANDIDATE_FILE_NAMES = %w[LICENSE License license LICENCE Licence licence COPYING copying README readme].freeze
-    CANDIDATE_PATH_WILDCARD = "*{#{CANDIDATE_FILE_NAMES.join(',')}}*"
+    CANDIDATE_PATH_WILDCARD = "*{#{CANDIDATE_FILE_NAMES.join(',')}}*".freeze
 
     def self.find(install_path, options = {})
       new(install_path).find(options)
