@@ -6,7 +6,7 @@
 * Create a feature branch.
 * Make your feature addition or bug fix. Please make sure there is appropriate test coverage.
 * Rebase on top of master.
-* Send a pull request with commit messages tagged with an entry specified here: https://keepachangelog.com/en/1.0.0/.
+* Send a pull request with a [Conventional Commit](https://www.conventionalcommits.org/) title, which release-please turns into the changelog entry. See [release/instructions.md](release/instructions.md).
 
 ## Running Tests
 
