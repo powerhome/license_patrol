@@ -3,7 +3,7 @@
 require_relative 'lib/license_patrol/version'
 
 Gem::Specification.new do |s|
-  s.required_ruby_version = '>= 2.6.0'
+  s.required_ruby_version = '>= 3.0.0'
   s.name        = 'license_patrol'
   s.version     = LicensePatrol::VERSION
 
@@ -45,7 +45,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'bundler'
   s.add_dependency 'csv', '~> 3.2'
-  s.add_dependency 'rubyzip', '>=1', '<3'
+  s.add_dependency 'rubyzip', '>= 3.4', '< 4'
   s.add_dependency 'thor', '~> 1.2'
   s.add_dependency 'tomlrb', '>= 1.3', '< 2.1'
   s.add_dependency 'with_env', '1.1.0'

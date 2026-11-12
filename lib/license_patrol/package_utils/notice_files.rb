@@ -5,8 +5,8 @@ require 'license_patrol/package_utils/possible_license_file'
 module LicensePatrol
   class NoticeFiles
     CANDIDATE_FILE_NAMES = %w[NOTICE Notice].freeze
-    CANDIDATE_PATH_WILDCARD_STRICT = "{#{CANDIDATE_FILE_NAMES.join(',')}}*"
-    CANDIDATE_PATH_WILDCARD = "*#{CANDIDATE_PATH_WILDCARD_STRICT}"
+    CANDIDATE_PATH_WILDCARD_STRICT = "{#{CANDIDATE_FILE_NAMES.join(',')}}*".freeze
+    CANDIDATE_PATH_WILDCARD = "*#{CANDIDATE_PATH_WILDCARD_STRICT}".freeze
 
     def self.find(install_path, options = {})
       new(install_path).find(options)
