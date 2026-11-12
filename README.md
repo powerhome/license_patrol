@@ -172,7 +172,7 @@ If it does not, ensure the command is not quoted.
 Note that the docker image will run the gem which is installed within it.
 So the docker image tagged `7.0.0` will run *License Patrol Version 7.0.0*
 
-See the [contributing guide](https://github.com/powerhome/license_patrol/blob/master/CONTRIBUTING.md) for information on development. 
+See the [contributing guide](https://github.com/powerhome/license_patrol/blob/main/CONTRIBUTING.md) for information on development. 
 
 ### Activation
 
@@ -333,7 +333,7 @@ explicitly declare a license, yarn indicates that it has inferred the license ba
 on some keywords in other files by appending an asterisk to the license name. If you
 see a * at the end of the license name, this is intended.
 
-See [CONTRIBUTING.md](https://github.com/powerhome/license_patrol/blob/master/CONTRIBUTING.md#adding-reports)
+See [CONTRIBUTING.md](https://github.com/powerhome/license_patrol/blob/main/CONTRIBUTING.md#adding-reports)
 for advice about adding and customizing reports.
 
 
@@ -600,7 +600,7 @@ And save a `LICENSE` file which contains your license text in your repo.
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/powerhome/license_patrol/blob/master/CONTRIBUTING.md).
+See [CONTRIBUTING.md](https://github.com/powerhome/license_patrol/blob/main/CONTRIBUTING.md).
 
 
 ## License

@@ -5,7 +5,7 @@
 * Fork the project from https://github.com/powerhome/license_patrol
 * Create a feature branch.
 * Make your feature addition or bug fix. Please make sure there is appropriate test coverage.
-* Rebase on top of master.
+* Rebase on top of main.
 * Send a pull request with a [Conventional Commit](https://www.conventionalcommits.org/) title, which release-please turns into the changelog entry. See [release/instructions.md](release/instructions.md).
 
 ## Running Tests
@@ -37,14 +37,14 @@ docker run -v $PWD:/scan -it licensefinder/license_finder /bin/bash -l
 ## Adding Package Managers
 
 There are a few steps to adding a new package manager.
-The main things which need to be implemented are mentioned in [Package Manager](https://github.com/powerhome/license_patrol/blob/master/lib/license_patrol/package_manager.rb).
+The main things which need to be implemented are mentioned in [Package Manager](https://github.com/powerhome/license_patrol/blob/main/lib/license_patrol/package_manager.rb).
 
 [Here](https://github.com/pivotal/LicenseFinder/compare/v2.0.0...v2.0.1) is how
 support was added for `rebar`, an `erlang` package manager.
 
 There are feature tests and unit tests for each currently supported package manager.
-* [Feature test example](https://github.com/powerhome/license_patrol/blob/master/features/features/package_managers/gvt_spec.rb)
-* [Unit test example](https://github.com/powerhome/license_patrol/blob/master/spec/lib/license_patrol/package_managers/gvt_spec.rb)
+* [Feature test example](https://github.com/powerhome/license_patrol/blob/main/features/features/package_managers/gvt_spec.rb)
+* [Unit test example](https://github.com/powerhome/license_patrol/blob/main/spec/lib/license_patrol/package_managers/gvt_spec.rb)
 
 ## Adding Licenses
 
@@ -60,13 +60,13 @@ submitting a pull request which adds new columns to
 `lib/license_patrol/reports/csv_report.rb`.
 
 It is also possible to generate a custom report from an ERB template.  Use this
-[example](https://github.com/powerhome/license_patrol/blob/master/examples/custom_erb_template.rb) as a starting
+[example](https://github.com/powerhome/license_patrol/blob/main/examples/custom_erb_template.rb) as a starting
 point.  These reports will have access to the helpers in
-[`LicensePatrol::ErbReport`](https://github.com/powerhome/license_patrol/blob/master/lib/license_patrol/reports/erb_report.rb).
+[`LicensePatrol::ErbReport`](https://github.com/powerhome/license_patrol/blob/main/lib/license_patrol/reports/erb_report.rb).
 
 If you need a report with more detailed data or in a different format, we
 recommend writing a custom ruby script.  This
-[example](https://github.com/powerhome/license_patrol/blob/master/examples/extract_license_data.rb) will get you
+[example](https://github.com/powerhome/license_patrol/blob/main/examples/extract_license_data.rb) will get you
 started.
 
 If you come up with something useful, consider posting it to the Google Group

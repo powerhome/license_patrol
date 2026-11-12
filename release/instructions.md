@@ -10,7 +10,7 @@ with `.release-please-manifest.json`, `Gemfile.lock` and the
 
 ## Pull request titles
 
-Pull requests are squash-merged, so each title becomes the commit on `master`
+Pull requests are squash-merged, so each title becomes the commit on `main`
 that release-please reads. Titles follow
 [Conventional Commits](https://www.conventionalcommits.org/), and the
 required `Conventional Commit title` check enforces it:
@@ -28,11 +28,11 @@ people who use the gem.
 
 ## Releasing
 
-1. Every push to `master` makes the `release-please` workflow open or update
+1. Every push to `main` makes the `release-please` workflow open or update
    a release pull request. It bumps the version, pins it in `Gemfile.lock`,
    and adds the release's changelog entry.
 2. Review the pull request and merge it when you want to release. To release
-   a different version than the one it proposes, merge a commit to `master`
+   a different version than the one it proposes, merge a commit to `main`
    with a `Release-As: 2.0.0` footer first.
 3. Merging it tags the commit `vMAJOR.MINOR.PATCH` and creates the GitHub
    Release. The tag runs the `license_patrol` workflow, which publishes the
@@ -53,7 +53,7 @@ bundle exec rake build release:rubygem_push
   the tag would never publish the gem. The app needs read and write access to
   contents and pull requests on this repository. Its `RELEASE_APP_CLIENT_ID`
   variable and `RELEASE_APP_PRIVATE_KEY` secret live in the `release`
-  environment, which only `master` can deploy to, so no run from another
+  environment, which only `main` can deploy to, so no run from another
   branch or a tag can read the key. Never add them as repository secrets or
   variables.
 - The `license_patrol` workflow publishes the gem with the `RUBYGEMS_API_KEY`
