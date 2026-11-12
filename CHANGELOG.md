@@ -5,6 +5,13 @@ release-please writes each release's entry from the Conventional Commit titles
 of its pull requests; see [release/instructions.md](release/instructions.md).
 Entries before 1.0.0 are LicenseFinder's history.
 
+## [1.2.1](https://github.com/powerhome/license_patrol/compare/v1.2.0...v1.2.1) (2026-11-12)
+
+
+### Fixed
+
+* **deps:** Require rubyzip 3.4 to patch path traversal ([#11](https://github.com/powerhome/license_patrol/issues/11)) ([81e2049](https://github.com/powerhome/license_patrol/commit/81e20497365375ff8401279581f8fbd401ba5e35))
+
 ## [1.2.0] / 2026-10-28
 
 ### Fixed
